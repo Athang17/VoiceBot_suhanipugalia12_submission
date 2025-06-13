@@ -3,6 +3,7 @@ import time
 import os
 import requests
 
+# Use us-west-2 to match your bucket
 region = 'us-west-2'
 s3 = boto3.client('s3', region_name=region)
 transcribe = boto3.client('transcribe', region_name=region)

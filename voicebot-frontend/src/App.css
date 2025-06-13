@@ -1,38 +1,63 @@
-.App {
-  text-align: center;
+/* src/App.css */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f5f7fb;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.typing-indicator {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  background-color: #666;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0 2px;
+  animation: typing 1s infinite ease;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.typing-indicator span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+
+  0%,
+  100% {
+    transform: translateY(0);
   }
-  to {
-    transform: rotate(360deg);
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Add some responsive behavior */
+@media (max-width: 600px) {
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tabButton {
+    margin-bottom: 0.5rem;
   }
 }

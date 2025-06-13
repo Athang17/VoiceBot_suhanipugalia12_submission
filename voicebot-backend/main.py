@@ -27,5 +27,18 @@ def transcribe():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/query', methods=['POST'])
+def query():
+    data = request.get_json()
+    prompt = data.get("text", "")
+    if not prompt.strip():
+        return jsonify({"error": "Empty prompt"}), 400
+    try:
+        response = generate_response_bedrock(prompt)
+        return jsonify({"response": response})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == '__main__':
     app.run(debug=True)

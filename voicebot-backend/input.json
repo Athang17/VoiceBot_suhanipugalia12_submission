@@ -1,6 +1,10 @@
 {
-  "inputText": "Hello",
-  "textGenerationConfig": {
-    "maxTokenCount": 10
-  }
+  "anthropic_version": "bedrock-2023-05-31",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello, how are you?"
+    }
+  ],
+  "max_tokens": 50
 }
