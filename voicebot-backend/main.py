@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from modules.transcribe_aws import transcribe_audio
+from modules.bedrock_model import generate_response_bedrock
 from dotenv import load_dotenv
 import os
 import uuid
@@ -21,7 +22,8 @@ def transcribe():
 
     try:
         transcript = transcribe_audio(filepath, filename)
-        return jsonify({"transcript": transcript})
+        response = generate_response_bedrock(transcript)
+        return jsonify({"transcript": transcript, "response": response})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

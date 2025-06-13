@@ -1,0 +1,6 @@
+{
+  "inputText": "Hello",
+  "textGenerationConfig": {
+    "maxTokenCount": 10
+  }
+}
