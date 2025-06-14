@@ -1,0 +1,20 @@
+[
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Lenovo is from which country?"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Lenovo is a Chinese multinational technology company. It was founded in Beijing, China in 1984 under the name \"Legend.\" The company changed its name to \"Lenovo\" in 2004.\n\nWhile Lenovo has expanded globally and has operations in many countries, including significant presence in the United States after acquiring IBM's personal computer business in 2005, its headquarters remain in Beijing, China. The company also has operational headquarters in Morrisville, North Carolina, USA.\n\nLenovo is known for producing a wide range of technology products, including personal computers, tablets, smartphones, workstations, servers, electronic storage devices, IT management software, and smart TVs."
+      }
+    ]
+  }
+]
