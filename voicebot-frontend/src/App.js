@@ -8,6 +8,8 @@ function VoiceApp() {
   const [loading, setLoading] = useState(false);
   const [playingUrl, setPlayingUrl] = useState(null);
   const [conversationContext, setConversationContext] = useState([]);
+  const [textInput, setTextInput] = useState('');
+  const [inputMode, setInputMode] = useState('voice'); // 'voice' or 'text'
   
   // Refs
   const mediaRecorderRef = useRef(null);
@@ -38,7 +40,16 @@ function VoiceApp() {
     }
   }, [recording]);
 
-  // Add conversational micro-interactions
+  // Clean up audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
   const addThinkingMessage = () => {
     const thinkingPhrases = [
       "Hmm, let me think...",
@@ -102,6 +113,65 @@ function VoiceApp() {
     }]);
   };
 
+  const sendTextToBackend = async () => {
+    if (!textInput.trim()) return;
+    
+    setLoading(true);
+    addThinkingMessage();
+    
+    const userMessage = {
+      sender: 'user',
+      text: textInput,
+      timestamp: new Date().toLocaleTimeString(),
+      id: Date.now() + '-user'
+    };
+    
+    setMessages(prev => [...prev, userMessage]);
+    setTextInput('');
+    
+    try {
+      const res = await fetch("http://localhost:5000/query", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: textInput,
+          context: conversationContext.slice(-3)
+        })
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      // Remove thinking message
+      setMessages(prev => prev.filter(msg => !msg.isThinking));
+
+      // Add bot response
+      const botMessage = {
+        sender: 'bot',
+        text: data.response,
+        audioUrl: data.audio_url,
+        timestamp: new Date().toLocaleTimeString(),
+        id: Date.now() + '-bot',
+        suggestions: data.suggestions || []
+      };
+      
+      setMessages(prev => [...prev, botMessage]);
+
+      // Update conversation context
+      setConversationContext(prev => [...prev, {
+        user: textInput,
+        bot: data.response
+      }]);
+    } catch (err) {
+      setMessages(prev => prev.filter(msg => !msg.isThinking));
+      addErrorMessage("Error: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const sendAudioToBackend = async (audioBlob) => {
     setLoading(true);
     addThinkingMessage();
@@ -112,7 +182,7 @@ function VoiceApp() {
       
       // Add conversation context to help with memory
       if (conversationContext.length > 0) {
-        formData.append("context", JSON.stringify(conversationContext.slice(-3))); // Last 3 exchanges
+        formData.append("context", JSON.stringify(conversationContext.slice(-3)));
       }
 
       const res = await fetch("http://localhost:5000/transcribe", {
@@ -169,11 +239,19 @@ function VoiceApp() {
       if (audioRef.current) {
         audioRef.current.pause();
       }
-      const audio = new Audio(`http://localhost:5000${url}`);
-      audioRef.current = audio;
+      audioRef.current = new Audio(`http://localhost:5000${url}`);
       setPlayingUrl(url);
-      audio.play();
-      audio.onended = () => setPlayingUrl(null);
+      audioRef.current.play()
+        .catch(err => {
+          console.error("Audio playback error:", err);
+          addErrorMessage("Audio playback failed. Please try again.");
+          setPlayingUrl(null);
+        });
+      audioRef.current.onended = () => setPlayingUrl(null);
+      audioRef.current.onerror = () => {
+        addErrorMessage("Audio playback error");
+        setPlayingUrl(null);
+      };
     }
   };
 
@@ -234,7 +312,7 @@ function VoiceApp() {
            style={{ maxHeight: '60vh' }}>
         {messages.length === 0 ? (
           <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            <p className="mb-2">Start by pressing the microphone button</p>
+            <p className="mb-2">Start by pressing the microphone button or typing a message</p>
             <p className="text-sm">Try speaking in English or Hindi!</p>
           </div>
         ) : (
@@ -286,39 +364,90 @@ function VoiceApp() {
         <div ref={chatEndRef} />
       </div>
 
-      {/* Recording button with status */}
-      <div className="flex flex-col items-center gap-2">
-        {recording && (
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-            <span className="text-sm text-red-500">Recording</span>
-            <div className="flex items-center gap-1 h-6">
-              {waveform.map((height, i) => (
-                <div 
-                  key={i} 
-                  className="w-1 bg-red-500 rounded-full" 
-                  style={{ height: `${height * 20}px` }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-        
-        <button
-          onClick={recording ? stopRecording : startRecording}
-          className={`px-6 py-3 rounded-full text-white font-bold shadow-lg transition-all ${
-            recording ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
-          }`}
-        >
-          {recording ? '⏹ Stop Recording' : '🎤 Start Recording'}
-        </button>
-        
-        {loading && (
-          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} animate-pulse`}>
-            Processing your voice...
-          </p>
-        )}
+      {/* Input mode selector */}
+      <div className="flex justify-center mb-4">
+        <div className={`inline-flex rounded-md shadow-sm ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`} role="group">
+          <button
+            onClick={() => setInputMode('voice')}
+            className={`px-4 py-2 text-sm font-medium rounded-l-lg ${inputMode === 'voice' 
+              ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
+              : (darkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-100 text-gray-700')}`}
+          >
+            Voice Input
+          </button>
+          <button
+            onClick={() => setInputMode('text')}
+            className={`px-4 py-2 text-sm font-medium rounded-r-lg ${inputMode === 'text' 
+              ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
+              : (darkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-100 text-gray-700')}`}
+          >
+            Text Input
+          </button>
+        </div>
       </div>
+
+      {/* Input area */}
+      {inputMode === 'text' ? (
+        <div className="flex flex-col items-center gap-2 max-w-3xl w-full mx-auto">
+          <div className="flex w-full gap-2">
+            <input
+              type="text"
+              value={textInput}
+              onChange={(e) => setTextInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && sendTextToBackend()}
+              placeholder="Type your message..."
+              className={`flex-1 px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 text-white placeholder-gray-400' : 'bg-white text-gray-800 placeholder-gray-500'} border ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}
+            />
+            <button
+              onClick={sendTextToBackend}
+              disabled={loading || !textInput.trim()}
+              className={`px-4 py-2 rounded-lg font-medium ${loading || !textInput.trim() 
+                ? (darkMode ? 'bg-gray-600 text-gray-400' : 'bg-gray-300 text-gray-500') 
+                : (darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white')}`}
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-2">
+          {recording && (
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+              <span className="text-sm text-red-500">Recording</span>
+              <div className="flex items-center gap-1 h-6">
+                {waveform.map((height, i) => (
+                  <div 
+                    key={i} 
+                    className="w-1 bg-red-500 rounded-full" 
+                    style={{ height: `${height * 20}px` }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <button
+            onClick={recording ? stopRecording : startRecording}
+            disabled={loading}
+            className={`px-6 py-3 rounded-full text-white font-bold shadow-lg transition-all ${
+              recording 
+                ? 'bg-red-500 hover:bg-red-600' 
+                : loading 
+                  ? 'bg-gray-500' 
+                  : 'bg-green-500 hover:bg-green-600'
+            }`}
+          >
+            {recording ? '⏹ Stop Recording' : loading ? 'Processing...' : '🎤 Start Recording'}
+          </button>
+          
+          {loading && (
+            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} animate-pulse`}>
+              Processing your {inputMode === 'voice' ? 'voice' : 'message'}...
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Inline styles for animations */}
       <style>{`
