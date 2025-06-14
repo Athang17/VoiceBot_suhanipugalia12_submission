@@ -3,6 +3,8 @@ from flask_cors import CORS
 import os
 import uuid
 from dotenv import load_dotenv
+import sys
+sys.path.append("voicebot-backend")
 
 from modules.transcribe_aws import transcribe_audio
 from modules.bedrock_model import generate_response_bedrock
