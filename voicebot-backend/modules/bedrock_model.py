@@ -93,4 +93,3 @@ def generate_response_bedrock(prompt):
         print(f"An unexpected error occurred during Bedrock invocation: {e}")
         traceback.print_exc() # Print full traceback for any other exceptions
         return f"Error calling Claude 3.5: {e}"
-
