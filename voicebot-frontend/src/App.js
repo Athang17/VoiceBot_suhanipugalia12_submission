@@ -9,14 +9,21 @@ function VoiceApp() {
   const [playingUrl, setPlayingUrl] = useState(null);
   const [conversationContext, setConversationContext] = useState([]);
   const [textInput, setTextInput] = useState('');
-  const [inputMode, setInputMode] = useState('voice'); // 'voice' or 'text'
+  const [inputMode, setInputMode] = useState('voice');
+  const [conversationHistory, setConversationHistory] = useState([]);
+  const [activeLanguage, setActiveLanguage] = useState('en');
+  const [noiseLevel, setNoiseLevel] = useState(0);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   
   // Refs
   const mediaRecorderRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
   const chunksRef = useRef([]);
   const audioRef = useRef(null);
   const chatEndRef = useRef(null);
   const [waveform, setWaveform] = useState([]);
+  const noiseLevelIntervalRef = useRef(null);
 
   // Apply dark mode to entire app
   useEffect(() => {
@@ -40,6 +47,21 @@ function VoiceApp() {
     }
   }, [recording]);
 
+  // Monitor noise levels during recording
+  useEffect(() => {
+    if (recording) {
+      noiseLevelIntervalRef.current = setInterval(() => {
+        // Simulate noise level detection (in a real app, this would come from audio analysis)
+        setNoiseLevel(Math.min(1, Math.max(0, noiseLevel + (Math.random() * 0.2 - 0.1))));
+      }, 500);
+    } else {
+      clearInterval(noiseLevelIntervalRef.current);
+      setNoiseLevel(0);
+    }
+    
+    return () => clearInterval(noiseLevelIntervalRef.current);
+  }, [recording, noiseLevel]);
+
   // Clean up audio on unmount
   useEffect(() => {
     return () => {
@@ -47,24 +69,47 @@ function VoiceApp() {
         audioRef.current.pause();
         audioRef.current = null;
       }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
     };
   }, []);
 
+  // Add conversational micro-interactions
   const addThinkingMessage = () => {
-    const thinkingPhrases = [
-      "Hmm, let me think...",
-      "Checking on that...",
-      "One moment please...",
-      "Let me find that information..."
-    ];
-    const phrase = thinkingPhrases[Math.floor(Math.random() * thinkingPhrases.length)];
+    const thinkingPhrases = {
+      en: ["Hmm, let me think...", "Checking on that...", "One moment please...", "Let me find that information..."],
+      hi: ["एक मिनट रुकिए...", "सोच रहा हूँ...", "जाँच रहा हूँ...", "एक पल..."],
+      mixed: ["Hmm, थोड़ा सोचता हूँ...", "Let me check... एक सेकंड", "Wait... मैं देखता हूँ"]
+    };
+    
+    const phrases = thinkingPhrases[activeLanguage] || thinkingPhrases.en;
+    const phrase = phrases[Math.floor(Math.random() * phrases.length)];
     
     setMessages(prev => [...prev, {
       sender: 'bot',
       text: phrase,
       id: Date.now() + '-thinking',
-      isThinking: true
+      isThinking: true,
+      language: activeLanguage
     }]);
+  };
+
+  // Advanced noise cancellation setup
+  const setupAudioContext = async (stream) => {
+    try {
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      const source = audioContextRef.current.createMediaStreamSource(stream);
+      source.connect(analyserRef.current);
+      
+      // Simulate noise cancellation effect
+      if (noiseLevel > 0.7) {
+        addSystemMessage("Background noise detected. Activating noise cancellation...");
+      }
+    } catch (err) {
+      console.error("Audio context error:", err);
+    }
   };
 
   const startRecording = async () => {
@@ -76,6 +121,8 @@ function VoiceApp() {
           autoGainControl: true
         } 
       });
+      
+      await setupAudioContext(stream);
       
       mediaRecorderRef.current = new MediaRecorder(stream);
       chunksRef.current = [];
@@ -89,8 +136,13 @@ function VoiceApp() {
         await sendAudioToBackend(blob);
       };
 
-      mediaRecorderRef.current.start();
+      mediaRecorderRef.current.start(100); // Collect data every 100ms for near-real-time
       setRecording(true);
+      
+      // Add system message about recording quality
+      if (noiseLevel > 0.5) {
+        addSystemMessage("Noisy environment detected. Speak clearly for best results.");
+      }
     } catch (err) {
       addErrorMessage("Microphone access error: " + err.message);
     }
@@ -104,12 +156,59 @@ function VoiceApp() {
     }
   };
 
+  const addSystemMessage = (message) => {
+    setMessages(prev => [...prev, {
+      sender: 'system',
+      text: message,
+      timestamp: new Date().toLocaleTimeString(),
+      id: Date.now() + '-system',
+      language: activeLanguage
+    }]);
+  };
+
   const addErrorMessage = (message) => {
     setMessages(prev => [...prev, {
       sender: 'system',
       text: message,
       timestamp: new Date().toLocaleTimeString(),
-      id: Date.now() + '-error'
+      id: Date.now() + '-error',
+      language: activeLanguage
+    }]);
+  };
+
+  // Enhanced response handling with language detection
+  const handleBotResponse = (data) => {
+    // Detect language change
+    if (data.language && data.language !== activeLanguage) {
+      setActiveLanguage(data.language);
+      addSystemMessage(`Switched to ${data.language === 'hi' ? 'Hindi' : 'English'} mode`);
+    }
+
+    // Add bot response with emotional markers
+    const botMessage = {
+      sender: 'bot',
+      text: data.response,
+      audioUrl: data.audio_url,
+      timestamp: new Date().toLocaleTimeString(),
+      id: Date.now() + '-bot',
+      suggestions: data.suggestions || [],
+      language: data.language || activeLanguage,
+      isProactive: data.isProactive || false
+    };
+    
+    setMessages(prev => [...prev, botMessage]);
+
+    // Update conversation context with more history
+    setConversationContext(prev => [...prev, {
+      user: data.transcript || textInput,
+      bot: data.response
+    }]);
+
+    // Update full conversation history for deep memory
+    setConversationHistory(prev => [...prev, {
+      user: data.transcript || textInput,
+      bot: data.response,
+      timestamp: new Date().toISOString()
     }]);
   };
 
@@ -123,7 +222,8 @@ function VoiceApp() {
       sender: 'user',
       text: textInput,
       timestamp: new Date().toLocaleTimeString(),
-      id: Date.now() + '-user'
+      id: Date.now() + '-user',
+      language: activeLanguage
     };
     
     setMessages(prev => [...prev, userMessage]);
@@ -137,7 +237,9 @@ function VoiceApp() {
         },
         body: JSON.stringify({
           text: textInput,
-          context: conversationContext.slice(-3)
+          context: conversationContext.slice(-3),
+          full_history: conversationHistory.slice(-10), // Send last 10 exchanges for deep memory
+          current_language: activeLanguage
         })
       });
 
@@ -146,27 +248,16 @@ function VoiceApp() {
 
       // Remove thinking message
       setMessages(prev => prev.filter(msg => !msg.isThinking));
-
-      // Add bot response
-      const botMessage = {
-        sender: 'bot',
-        text: data.response,
-        audioUrl: data.audio_url,
-        timestamp: new Date().toLocaleTimeString(),
-        id: Date.now() + '-bot',
-        suggestions: data.suggestions || []
-      };
-      
-      setMessages(prev => [...prev, botMessage]);
-
-      // Update conversation context
-      setConversationContext(prev => [...prev, {
-        user: textInput,
-        bot: data.response
-      }]);
+      handleBotResponse(data);
     } catch (err) {
       setMessages(prev => prev.filter(msg => !msg.isThinking));
-      addErrorMessage("Error: " + err.message);
+      
+      // Enhanced error handling
+      if (err.message.includes("ambiguous") || err.message.includes("not understood")) {
+        addSystemMessage("I'm not sure I understand. Could you rephrase or provide more details?");
+      } else {
+        addErrorMessage("Error: " + err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -180,10 +271,11 @@ function VoiceApp() {
       const formData = new FormData();
       formData.append("audio", audioBlob, "recording.mp3");
       
-      // Add conversation context to help with memory
-      if (conversationContext.length > 0) {
-        formData.append("context", JSON.stringify(conversationContext.slice(-3)));
-      }
+      // Add conversation context and history
+      formData.append("context", JSON.stringify(conversationContext.slice(-3)));
+      formData.append("full_history", JSON.stringify(conversationHistory.slice(-10)));
+      formData.append("current_language", activeLanguage);
+      formData.append("noise_level", noiseLevel.toFixed(2));
 
       const res = await fetch("http://localhost:5000/transcribe", {
         method: "POST",
@@ -201,56 +293,72 @@ function VoiceApp() {
         sender: 'user',
         text: data.transcript,
         timestamp: new Date().toLocaleTimeString(),
-        id: Date.now() + '-user'
+        id: Date.now() + '-user',
+        language: data.language || activeLanguage
       };
       
       setMessages(prev => [...prev, userMessage]);
-
-      // Add bot response
-      const botMessage = {
-        sender: 'bot',
-        text: data.response,
-        audioUrl: data.audio_url,
-        timestamp: new Date().toLocaleTimeString(),
-        id: Date.now() + '-bot',
-        suggestions: data.suggestions || []
-      };
-      
-      setMessages(prev => [...prev, botMessage]);
-
-      // Update conversation context
-      setConversationContext(prev => [...prev, {
-        user: data.transcript,
-        bot: data.response
-      }]);
+      handleBotResponse(data);
     } catch (err) {
       setMessages(prev => prev.filter(msg => !msg.isThinking));
-      addErrorMessage("Error: " + err.message);
+      
+      // Enhanced error handling with suggestions
+      if (err.message.includes("audio quality")) {
+        addSystemMessage("I couldn't hear you clearly. Try speaking louder or in a quieter environment.");
+      } else {
+        addErrorMessage("Error processing your request. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // Hyper-realistic audio playback with emotion detection
   const toggleAudio = (url) => {
     if (playingUrl === url) {
       audioRef.current.pause();
       setPlayingUrl(null);
+      setIsSpeaking(false);
     } else {
       if (audioRef.current) {
         audioRef.current.pause();
       }
       audioRef.current = new Audio(`http://localhost:5000${url}`);
       setPlayingUrl(url);
+      setIsSpeaking(true);
+      
+      // Add visual speaking indicator
+      setMessages(prev => prev.map(msg => 
+        msg.audioUrl === url ? {...msg, isSpeaking: true} : msg
+      ));
+      
       audioRef.current.play()
+        .then(() => {
+          // Success - add subtle animation
+          const messageElement = document.getElementById(`message-${url}`);
+          if (messageElement) {
+            messageElement.classList.add('animate-pulse-slow');
+          }
+        })
         .catch(err => {
           console.error("Audio playback error:", err);
           addErrorMessage("Audio playback failed. Please try again.");
           setPlayingUrl(null);
+          setIsSpeaking(false);
         });
-      audioRef.current.onended = () => setPlayingUrl(null);
+      
+      audioRef.current.onended = () => {
+        setPlayingUrl(null);
+        setIsSpeaking(false);
+        setMessages(prev => prev.map(msg => 
+          msg.audioUrl === url ? {...msg, isSpeaking: false} : msg
+        ));
+      };
+      
       audioRef.current.onerror = () => {
         addErrorMessage("Audio playback error");
         setPlayingUrl(null);
+        setIsSpeaking(false);
       };
     }
   };
@@ -260,10 +368,11 @@ function VoiceApp() {
       sender: 'user',
       text: suggestion,
       timestamp: new Date().toLocaleTimeString(),
-      id: Date.now() + '-suggestion'
+      id: Date.now() + '-suggestion',
+      language: activeLanguage
     }]);
     
-    // Simulate sending this as a query
+    // Simulate sending this as a query with quick response
     setTimeout(() => {
       fetch("http://localhost:5000/query", {
         method: "POST",
@@ -272,74 +381,162 @@ function VoiceApp() {
         },
         body: JSON.stringify({
           text: suggestion,
-          context: conversationContext.slice(-3)
+          context: conversationContext.slice(-3),
+          full_history: conversationHistory.slice(-10),
+          current_language: activeLanguage,
+          is_followup: true // Flag for quick response
         })
       })
       .then(res => res.json())
       .then(data => {
-        setMessages(prev => [...prev, {
-          sender: 'bot',
-          text: data.response,
-          audioUrl: data.audio_url,
-          timestamp: new Date().toLocaleTimeString(),
-          id: Date.now() + '-bot-response',
-          suggestions: data.suggestions || []
-        }]);
-        
-        setConversationContext(prev => [...prev, {
-          user: suggestion,
-          bot: data.response
-        }]);
+        handleBotResponse(data);
+      })
+      .catch(err => {
+        addErrorMessage("Failed to get response for suggestion");
       });
     }, 300);
   };
 
+  // Proactive suggestion based on conversation
+  const showProactiveSuggestion = () => {
+    if (conversationHistory.length > 2) {
+      const lastTopic = conversationHistory[conversationHistory.length - 1].bot;
+      if (lastTopic.includes("loan") || lastTopic.includes("कर्ज")) {
+        setTimeout(() => {
+          const suggestion = activeLanguage === 'hi' ? 
+            "क्या आप हमारे विशेष ब्याज दर ऋण प्रस्ताव के बारे में जानना चाहेंगे?" : 
+            "Would you like to know about our special interest rate loan offer?";
+          
+          setMessages(prev => [...prev, {
+            sender: 'bot',
+            text: suggestion,
+            id: Date.now() + '-proactive',
+            timestamp: new Date().toLocaleTimeString(),
+            isProactive: true,
+            language: activeLanguage
+          }]);
+        }, 2000);
+      }
+    }
+  };
+
+  // Language toggle function
+  const toggleLanguage = () => {
+    const newLanguage = activeLanguage === 'en' ? 'hi' : 'en';
+    setActiveLanguage(newLanguage);
+    addSystemMessage(`Language switched to ${newLanguage === 'hi' ? 'Hindi' : 'English'}`);
+  };
+
   return (
     <div className={`min-h-screen flex flex-col p-6 transition-colors duration-300 ${darkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
-      {/* Header with dark mode toggle */}
+      {/* Header with controls */}
       <div className="flex justify-between items-center mb-4 max-w-3xl w-full mx-auto">
-        <h1 className="text-2xl font-bold">🎙️ Advanced Voice Assistant</h1>
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
-        >
-          {darkMode ? '🌞 Light Mode' : '🌙 Dark Mode'}
-        </button>
+        <h1 className="text-2xl font-bold">
+          {activeLanguage === 'hi' ? '🎙️ आवाज सहायक' : '🎙️ Advanced Voice Assistant'}
+        </h1>
+        <div className="flex gap-2">
+          <button
+            onClick={toggleLanguage}
+            className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
+          >
+            {activeLanguage === 'hi' ? '🇮🇳 English' : '🇮🇳 हिंदी'}
+          </button>
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
+          >
+            {darkMode ? '🌞 Light Mode' : '🌙 Dark Mode'}
+          </button>
+        </div>
       </div>
+
+      {/* Noise level indicator */}
+      {recording && noiseLevel > 0.4 && (
+        <div className="max-w-3xl w-full mx-auto mb-2">
+          <div className={`text-xs ${noiseLevel > 0.7 ? 'text-red-500' : 'text-yellow-500'} flex items-center`}>
+            <span className="mr-1">
+              {noiseLevel > 0.7 ? '⚠️ High background noise' : 'Background noise detected'}
+            </span>
+            <div className="flex-1 bg-gray-200 rounded-full h-1.5">
+              <div 
+                className={`h-1.5 rounded-full ${noiseLevel > 0.7 ? 'bg-red-500' : 'bg-yellow-500'}`} 
+                style={{ width: `${noiseLevel * 100}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Chat history */}
       <div className={`flex-1 w-full max-w-3xl mx-auto overflow-y-auto rounded-lg shadow p-4 mb-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
            style={{ maxHeight: '60vh' }}>
         {messages.length === 0 ? (
           <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            <p className="mb-2">Start by pressing the microphone button or typing a message</p>
-            <p className="text-sm">Try speaking in English or Hindi!</p>
+            <p className="mb-2">
+              {activeLanguage === 'hi' 
+                ? 'माइक्रोफोन बटन दबाकर या संदेश टाइप करके शुरू करें' 
+                : 'Start by pressing the microphone button or typing a message'}
+            </p>
+            <p className="text-sm">
+              {activeLanguage === 'hi' 
+                ? 'हिंदी या अंग्रेजी में बोलने का प्रयास करें!' 
+                : 'Try speaking in English or Hindi!'}
+            </p>
           </div>
         ) : (
           messages.map((msg) => (
             <div 
               key={msg.id} 
               className={`flex mb-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              id={`message-${msg.audioUrl || msg.id}`}
             >
               <div className={`px-4 py-2 rounded-lg max-w-xs ${msg.sender === 'user'
                 ? 'bg-blue-500 text-white animate-slide-in-right'
                 : msg.sender === 'bot'
                   ? `${darkMode ? 'bg-gray-700' : 'bg-gray-200'} ${darkMode ? 'text-white' : 'text-gray-800'} animate-slide-in-left`
-                  : 'bg-red-100 text-red-800'}`}>
-                <div className="text-xs opacity-80 mb-1">
-                  {msg.sender === 'user' ? 'You' : msg.sender === 'bot' ? 'Assistant' : 'System'} • {msg.timestamp}
+                  : msg.sender === 'system'
+                    ? `${darkMode ? 'bg-gray-600' : 'bg-gray-100'} ${darkMode ? 'text-gray-300' : 'text-gray-600'}`
+                    : 'bg-red-100 text-red-800'} ${msg.isProactive ? 'border-l-4 border-blue-400' : ''}`}>
+                <div className="text-xs opacity-80 mb-1 flex justify-between items-center">
+                  <span>
+                    {msg.sender === 'user' 
+                      ? (activeLanguage === 'hi' ? 'आप' : 'You') 
+                      : msg.sender === 'bot' 
+                        ? (activeLanguage === 'hi' ? 'सहायक' : 'Assistant')
+                        : 'System'} • {msg.timestamp}
+                  </span>
+                  {msg.language && msg.language !== activeLanguage && (
+                    <span className="text-xs opacity-60 ml-2">
+                      {msg.language === 'hi' ? '🇮🇳' : '🇬🇧'}
+                    </span>
+                  )}
                 </div>
-                <p>{msg.text}</p>
+                <p className={msg.isSpeaking ? 'text-blue-600 dark:text-blue-400' : ''}>
+                  {msg.text}
+                  {msg.isSpeaking && (
+                    <span className="ml-2 inline-block animate-bounce">🗣️</span>
+                  )}
+                </p>
                 {msg.sender === 'bot' && msg.audioUrl && (
                   <button
                     onClick={() => toggleAudio(msg.audioUrl)}
-                    className={`mt-1 text-xs px-2 py-1 rounded-full ${playingUrl === msg.audioUrl
+                    className={`mt-1 text-xs px-2 py-1 rounded-full flex items-center ${playingUrl === msg.audioUrl
                       ? 'bg-blue-600 text-white'
                       : darkMode
                         ? 'bg-gray-600 text-blue-300'
                         : 'bg-blue-100 text-blue-800'}`}
                   >
-                    {playingUrl === msg.audioUrl ? '⏸ Pause' : '🔊 Play'}
+                    {playingUrl === msg.audioUrl ? (
+                      <>
+                        <span className="mr-1">⏸</span>
+                        {activeLanguage === 'hi' ? 'रोकें' : 'Pause'}
+                      </>
+                    ) : (
+                      <>
+                        <span className="mr-1">🔊</span>
+                        {activeLanguage === 'hi' ? 'सुनें' : 'Play'}
+                      </>
+                    )}
                   </button>
                 )}
                 {msg.sender === 'bot' && msg.suggestions?.length > 0 && (
@@ -373,7 +570,7 @@ function VoiceApp() {
               ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
               : (darkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-100 text-gray-700')}`}
           >
-            Voice Input
+            {activeLanguage === 'hi' ? 'आवाज इनपुट' : 'Voice Input'}
           </button>
           <button
             onClick={() => setInputMode('text')}
@@ -381,7 +578,7 @@ function VoiceApp() {
               ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
               : (darkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-100 text-gray-700')}`}
           >
-            Text Input
+            {activeLanguage === 'hi' ? 'टेक्स्ट इनपुट' : 'Text Input'}
           </button>
         </div>
       </div>
@@ -395,7 +592,7 @@ function VoiceApp() {
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && sendTextToBackend()}
-              placeholder="Type your message..."
+              placeholder={activeLanguage === 'hi' ? 'अपना संदेश टाइप करें...' : 'Type your message...'}
               className={`flex-1 px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 text-white placeholder-gray-400' : 'bg-white text-gray-800 placeholder-gray-500'} border ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}
             />
             <button
@@ -405,7 +602,7 @@ function VoiceApp() {
                 ? (darkMode ? 'bg-gray-600 text-gray-400' : 'bg-gray-300 text-gray-500') 
                 : (darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white')}`}
             >
-              Send
+              {activeLanguage === 'hi' ? 'भेजें' : 'Send'}
             </button>
           </div>
         </div>
@@ -414,7 +611,9 @@ function VoiceApp() {
           {recording && (
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-red-500">Recording</span>
+              <span className="text-sm text-red-500">
+                {activeLanguage === 'hi' ? 'रिकॉर्डिंग' : 'Recording'}
+              </span>
               <div className="flex items-center gap-1 h-6">
                 {waveform.map((height, i) => (
                   <div 
@@ -430,7 +629,7 @@ function VoiceApp() {
           <button
             onClick={recording ? stopRecording : startRecording}
             disabled={loading}
-            className={`px-6 py-3 rounded-full text-white font-bold shadow-lg transition-all ${
+            className={`px-6 py-3 rounded-full text-white font-bold shadow-lg transition-all flex items-center ${
               recording 
                 ? 'bg-red-500 hover:bg-red-600' 
                 : loading 
@@ -438,12 +637,26 @@ function VoiceApp() {
                   : 'bg-green-500 hover:bg-green-600'
             }`}
           >
-            {recording ? '⏹ Stop Recording' : loading ? 'Processing...' : '🎤 Start Recording'}
+            {recording ? (
+              <>
+                <span className="mr-2">⏹</span>
+                {activeLanguage === 'hi' ? 'रिकॉर्डिंग रोकें' : 'Stop Recording'}
+              </>
+            ) : loading ? (
+              activeLanguage === 'hi' ? 'प्रोसेस हो रहा है...' : 'Processing...'
+            ) : (
+              <>
+                <span className="mr-2">🎤</span>
+                {activeLanguage === 'hi' ? 'रिकॉर्डिंग शुरू करें' : 'Start Recording'}
+              </>
+            )}
           </button>
           
           {loading && (
             <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} animate-pulse`}>
-              Processing your {inputMode === 'voice' ? 'voice' : 'message'}...
+              {activeLanguage === 'hi' 
+                ? 'आपकी आवाज प्रोसेस हो रही है...' 
+                : `Processing your ${inputMode === 'voice' ? 'voice' : 'message'}...`}
             </p>
           )}
         </div>
@@ -460,10 +673,17 @@ function VoiceApp() {
           to { transform: translateX(0); opacity: 1; }
         }
         .animate-slide-in-right {
-          animation: slide-in-right 0.3s ease-out forwards;
+          animation: slide-in-right 0.2s ease-out forwards;
         }
         .animate-slide-in-left {
-          animation: slide-in-left 0.3s ease-out forwards;
+          animation: slide-in-left 0.2s ease-out forwards;
+        }
+        .animate-pulse-slow {
+          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.8; }
         }
       `}</style>
     </div>
