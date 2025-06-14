@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_2) and a customer service representative (speaker_1) from the Lending Club platform. The customer is inquiring about an issue with his account where the payment has not been reflected for the past two months.",
+    "customer_concerns": "- The customer's account payment has not been reflected for the past two months.\n- The customer is unable to reach the account manager's number provided to him.\n- The customer is concerned about the potential loss in his portfolio if the payment is not made within the 120-day period.",
+    "questions_asked": "- When will the customer's payment be credited?\n- Who will be responsible for the loss if the payment is not made within the 120-day period?\n- How can the customer be sure that the platform is not withholding the payment?",
+    "overall_sentiment": "Negative. The customer is frustrated with the lack of responsiveness from the customer service and the potential financial implications due to the delayed payment."
+}

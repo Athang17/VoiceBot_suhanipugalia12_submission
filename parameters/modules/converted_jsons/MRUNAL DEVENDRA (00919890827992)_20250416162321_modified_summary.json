@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_0) and a customer service representative (speaker_1) from a loan servicing company. The customer is inquiring about the status of their loan repayment and has some concerns regarding the amount received.",
+    "customer_concerns": "- The customer is unclear about the outstanding principal amount and the recent repayment transactions.\n- The customer is concerned that they received only half of the expected repayment amount.",
+    "questions_asked": "- What is the outstanding principal amount?\n- Why is the loan shown as \"closed\" when the customer has not received the full repayment amount?",
+    "overall_sentiment": "Neutral. While the customer expresses some confusion and concerns, the conversation appears to be an attempt to resolve the issues in a collaborative manner."
+}

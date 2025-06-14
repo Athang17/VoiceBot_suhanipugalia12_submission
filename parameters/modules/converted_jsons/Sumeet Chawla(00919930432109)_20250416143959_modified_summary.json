@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer, <PII_NAME>, and a customer service representative from a financial platform. The customer had transferred a certain amount of funds to an account in London and wanted to invest it on the platform. They discussed the investment options and process to complete the investment.",
+    "customer_concerns": "- The customer was initially confused about the investment process and the available options.\n- The customer was concerned about the available balance and why it was showing as zero.",
+    "questions_asked": "- The customer asked why the available balance was showing as zero when they had already transferred the funds.\n- The customer asked how the investment process would work and if there would be any auto-debit from their account.",
+    "overall_sentiment": "Positive. The customer service representative was able to guide the customer through the investment process and address their concerns, leading to a successful investment."
+}

@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_0) and a customer service representative (speaker_1) from an app/platform that allows users to invest. The customer is seeking clarification on the interest rates and calculations related to their investment.",
+    "customer_concerns": "- The customer is confused about the differences between the displayed interest rates (46-45%) and the actual monthly/annual interest rates they are receiving.\n- The customer wants to understand how the interest is calculated and compounded when they reinvest the returns.",
+    "questions_asked": "- What is the meaning of the 46-45% interest rates displayed on the app?\n- How is the monthly interest rate calculated from the annual interest rate?\n- How is the interest calculated when the customer reinvests the returns?\n- Does the interest get compounded when the customer reinvests the returns?",
+    "overall_sentiment": "Positive. The customer service representative patiently explains the interest rate calculations and the concept of compounding to the customer, helping them understand the investment better."
+}

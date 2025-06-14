@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer, Mr. <PII_NAME>, and a representative from Lending Club, a lending platform. They discuss the referral bonus that the customer is expecting and the details of Lending Club's manual lending option, which the customer had previously explained to one of his clients.",
+    "customer_concerns": "- The customer has not received the referral bonus for the account he referred in April.",
+    "questions_asked": "- What are the criteria and benefits of the 24% annual manual lending option?\n- What happens if a borrower defaults on their loan?\n- Can the customer partner with Lending Club to provide financial services in his city?",
+    "overall_sentiment": "Neutral. The conversation starts with the customer's concern about the referral bonus, but it then shifts to a more informative discussion about Lending Club's manual lending option and the possibility of a partnership."
+}

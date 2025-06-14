@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_1) and a customer service representative (speaker_0) from a P2P lending platform. The customer has made an investment on the platform and is seeking clarification on the details of the investment, including the interest rate, payout schedule, and any fees involved.",
+    "customer_concerns": "- The customer wants to understand the P2P lending process and how it works.\n- The customer is concerned about the actual interest rate and payout they will receive on their investment.\n- The customer wants to know the minimum and maximum investment amounts allowed on the platform.",
+    "questions_asked": "- What is the P2P lending process and how does it work?\n- How much interest will the customer receive on their investment?\n- What is the minimum and maximum investment amount allowed on the platform?\n- When will the customer start receiving the payout on their investment?\n- What are the charges or fees involved in the investment?",
+    "overall_sentiment": "Neutral. The customer is seeking information and clarification on the investment details, and the customer service representative is providing explanations and addressing the customer's concerns."
+}

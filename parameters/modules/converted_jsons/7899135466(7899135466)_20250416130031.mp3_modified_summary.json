@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_1) and a customer service representative (speaker_0) from the LendingClub, a p2p lending platform. The customer is inquiring about the charges and fees associated with lending money through the platform.",
+    "customer_concerns": "- The customer was unclear about the charges and fees that would be applied to their lending activities on the platform.",
+    "questions_asked": "- The customer asked for an example to explain the charges that would be applied if they invested 1 lakh on the platform.\n- The customer asked if the charges would be applied on the principal amount or the interest earned.",
+    "overall_sentiment": "Neutral. The customer was initially confused about the charges but the customer service representative was able to provide clear explanations to address the customer's concerns."
+}

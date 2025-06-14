@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_0) and a customer service representative (speaker_1) of a company. The customer is discussing a recent loan transaction and its impact on their account balance.",
+    "customer_concerns": "- The customer is unsure about a recent loan cancellation and its impact on their account balance.\n- The customer is concerned about an amount of \u20b91,000 that seems to have disappeared from their account.",
+    "questions_asked": "- The customer asks if a recent loan has been closed.\n- The customer asks where the \u20b91,000 difference in their account balance has gone.",
+    "overall_sentiment": "Neutral. The customer is seeking clarification on the loan transaction and account balance, but the conversation remains professional and constructive."
+}

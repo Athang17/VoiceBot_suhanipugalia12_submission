@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer, <PII_NAME>, and a representative from LendingClub, a P2P lending platform. The customer had earlier contacted the representative regarding investments on the LendingClub platform, and the representative is now following up with the customer to provide more information about the investment options and the risks involved.",
+    "customer_concerns": "- The customer is concerned about the risk involved in lending money through the platform and what happens if the borrowers do not repay the loans.",
+    "questions_asked": "- What is the rate of interest on the investments?\n- How does the platform handle cases where the borrowers do not repay the loans?\n- What is the minimum amount that can be invested?\n- How much return can the customer expect on a investment of \u20b91,000?",
+    "overall_sentiment": "Neutral. The customer seems interested in understanding the investment options and the risks involved, and the representative is providing detailed explanations to address the customer's concerns."
+}

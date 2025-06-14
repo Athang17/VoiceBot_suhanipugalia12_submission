@@ -1,0 +1,6 @@
+{
+    "summary": "This conversation is between a customer (speaker_0) and a relationship manager (speaker_1) from a lending platform. The customer had made an investment in the platform's PTP (Peer-to-Peer) lending and is now seeking more information about the returns and other details of the investment.",
+    "customer_concerns": "- The customer has doubts about the returns they will receive and the timeline for receiving them.\n- The customer is unsure about the lump-sum lending option and how it works compared to the manual lending.",
+    "questions_asked": "- When will the customer start receiving the returns on their investment?\n- What are the options and details for the lump-sum lending?\n- What is the rate of interest for the lump-sum lending?",
+    "overall_sentiment": "Neutral. The customer has some doubts and questions, but the conversation seems to be focused on providing information and clarifying the details rather than any negative sentiment."
+}

@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_1) and a customer service representative (speaker_0) from the Lending Club, a peer-to-peer lending platform. The customer has invested in the platform and has a query regarding the recent credit of funds in his account.",
+    "customer_concerns": "- The customer is concerned about the multiple entries in his account due to the recent credit of funds.\n- The customer wants to have the funds added to his wallet account instead of his bank account, as it would be more convenient for him to withdraw the funds as and when needed.",
+    "questions_asked": "- The customer asked if the funds can be added to his wallet account instead of his bank account.\n- The customer asked how many entries would be made in his account if the funds were credited.",
+    "overall_sentiment": "Neutral.\nThe customer is seeking clarification on the process and is open to the representative's explanation, but the representative is unable to accommodate the customer's request due to regulatory requirements."
+}
