@@ -1,0 +1,5 @@
+aws:
+  region: "us-west-2"
+  bucket: "voicebot-audio-bucket-suhani"
+  model_id: "anthropic.claude-3-5-sonnet-20240620-v1:0"
+  polly_voice: "Aditi"
