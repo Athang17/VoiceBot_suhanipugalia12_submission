@@ -1,9 +1,8 @@
 import csv
-import os
 import sys
+import os
 import time
 
-# Add the parent folder of `parameters` to the path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from parameters.modules.response_gen import generate_response_bedrock
@@ -25,8 +24,11 @@ with open(INPUT_FILE, newline='', encoding='utf-8') as infile, \
             continue
 
         try:
+            print(f"Processing: {question}")
             response = generate_response_bedrock(question)
+            print(f"Response: {response}")
         except Exception as e:
             response = f"Error: {e}"
+            print(response)
         writer.writerow([response])
         time.sleep(2)
