@@ -2,7 +2,7 @@ flask
 flask-cors
 python-dotenv
 boto3
-whisper
+openai-whisper
 torch
 scikit-learn
 numpy
