@@ -1,6 +1,0 @@
-{
-  "source": "auto_cache",
-  "original_question": "How does interest calculation work?",
-  "answer": "Interest calculation typically works as follows:\n\n1. Principal: The initial amount borrowed or invested.\n\n2. Interest rate: The percentage charged or earned on the principal.\n\n3. Time period: The duration for which interest is calculated.\n\n4. Simple interest: Calculated only on the principal amount.\n   Formula: Interest = Principal x Rate x Time\n\n5. Compound interest: Calculated on the principal and accumulated interest.\n   Formula: A = P(1 + r/n)^(nt), where A is the final amount, P is principal, r is annual interest rate, n is compounding frequency, and t is time in years.\n\n6. Frequency: Interest may be calculated daily, monthly, quarterly, or annually.\n\nThe specific method used depends on the financial product or agreement in question.",
-  "timestamp": "2025-06-14T17:35:34.586703"
-}
