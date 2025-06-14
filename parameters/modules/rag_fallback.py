@@ -4,12 +4,12 @@ import glob
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# ✅ Define folders to search for fallback answers
+# Define folders to search for fallback answers
 BASE_DIR = os.path.dirname(__file__)
 FOLDERS = [
     os.path.join(BASE_DIR, "converted_jsons"),
     os.path.join(BASE_DIR, "summaries"),
-    os.path.join(BASE_DIR, "auto_cached_jsons")  # 🔁 Cached Claude responses
+    os.path.join(BASE_DIR, "auto_cached_jsons")  # Cached Claude responses
 ]
 
 def extract_texts_from_file(filepath):
@@ -27,7 +27,7 @@ def extract_texts_from_file(filepath):
 
             return extracted
     except Exception as e:
-        print(f"⚠️ Failed to read {filepath}: {e}")
+        print(f"Failed to read {filepath}: {e}")
         return []
 
 def search_local_knowledge(query, threshold=0.92):
@@ -51,10 +51,10 @@ def search_local_knowledge(query, threshold=0.92):
                                     all_texts.append(item)
                                     text_meta.append((filepath, item, key, data))
             except Exception as e:
-                print(f"⚠️ Failed to read {filepath}: {e}")
+                print(f"Failed to read {filepath}: {e}")
 
     if not all_texts:
-        print("❌ No usable local knowledge found.")
+        print("No usable local knowledge found.")
         return None
 
     try:
@@ -67,18 +67,18 @@ def search_local_knowledge(query, threshold=0.92):
         matched_text = all_texts[best_idx]
         filepath, original_text, key, full_data = text_meta[best_idx]
 
-        print(f"🔍 Best local match score: {best_score:.3f}")
+        print(f"Best local match score: {best_score:.3f}")
 
         if best_score >= threshold:
-            print(f"♻️ Reusing cached/local answer (score {best_score:.3f})")
+            print(f"Reusing cached/local answer (score {best_score:.3f})")
 
-            # 🧠 Special handling for cached Claude JSON format
+            # Special handling for cached Claude JSON format
             if key == "original_question" and "answer" in full_data:
                 return full_data["answer"]
 
             return matched_text
 
     except Exception as e:
-        print(f"❌ RAG vectorization failed: {e}")
+        print(f"RAG vectorization failed: {e}")
 
     return None

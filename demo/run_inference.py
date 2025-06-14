@@ -2,6 +2,9 @@ import csv
 import os
 import sys
 import time
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # Add the parent folder of `parameters` to the path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))

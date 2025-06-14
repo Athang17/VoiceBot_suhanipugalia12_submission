@@ -6,6 +6,9 @@ import datetime
 import uuid
 import os
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from botocore.exceptions import ClientError
 from parameters.modules.rag_fallback import search_local_knowledge  # 👈 Import fallback
 
