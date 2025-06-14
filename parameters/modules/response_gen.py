@@ -3,12 +3,19 @@ import json
 import traceback
 import time
 from botocore.exceptions import ClientError
+from parameters.modules.rag_fallback import search_local_knowledge  # 👈 Import fallback
 
 def generate_response_bedrock(prompt, detected_lang=""):
     region = "us-west-2"
     model_id = "anthropic.claude-3-5-sonnet-20240620-v1:0"
 
-    # System prompt
+    # Step 1: Try retrieving a local match before using Claude
+    local_answer = search_local_knowledge(prompt)
+    if local_answer:
+        print("✅ Returning answer from local JSON fallback")
+        return local_answer
+
+    # Step 2: Build prompt for Claude if no match found
     system_instruction = (
         "You are a helpful and concise financial assistant. "
         "Always respond in the same language as the user. "
@@ -60,7 +67,7 @@ def generate_response_bedrock(prompt, detected_lang=""):
         except client.exceptions.ThrottlingException as e:
             print(f"⚠️ Throttled (attempt {attempt}/{max_retries}). Retrying in {delay}s...")
             time.sleep(delay)
-            delay *= 2
+            delay *= 2  # Exponential backoff
 
         except ClientError as e:
             traceback.print_exc()
