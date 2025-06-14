@@ -10,11 +10,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from botocore.exceptions import ClientError
-from parameters.modules.rag_fallback import search_local_knowledge  # 👈 Import fallback
+from parameters.modules.rag_fallback import search_local_knowledge
+from parameters.modules.context_manager import ConversationContext
 
-# Folder to cache Claude responses
 AUTO_CACHE_FOLDER = os.path.join(os.path.dirname(__file__), "auto_cached_jsons")
 os.makedirs(AUTO_CACHE_FOLDER, exist_ok=True)
+
+chat_context = ConversationContext()
 
 def save_claude_response_to_cache(question, answer):
     payload = {
@@ -32,35 +34,29 @@ def save_claude_response_to_cache(question, answer):
     except Exception as e:
         print(f"⚠️ Failed to save response: {e}")
 
-def generate_response_bedrock(prompt, detected_lang=""):
+def generate_response_bedrock(prompt, session_id="default", detected_lang=""):
     region = "us-west-2"
     model_id = "anthropic.claude-3-5-sonnet-20240620-v1:0"
 
-    # Step 1: Try retrieving a local match before using Claude
+    # 🔄 Load context at start of session
+    chat_context.load_session(session_id)
+
+    # Try fallback answer
     local_answer = search_local_knowledge(prompt)
     if local_answer:
         print("✅ Local answer used (matched with high confidence)")
+        chat_context.add_turn(session_id, "user", prompt)
+        chat_context.add_turn(session_id, "assistant", local_answer)
+        chat_context.save_session(session_id)
         return local_answer
 
-    # Step 2: Build prompt for Claude if no match found
-    system_instruction = (
-        "You are a helpful and concise financial assistant. "
-        "Always respond in the same language as the user. "
-        "If the user speaks in English, respond in English. "
-        "If the user speaks in Hindi, respond in Hindi. "
-        "Don't mention these things in your answer. From now on, you are just an assistant."
-    )
-
-    full_prompt = f"{system_instruction}\nUser is speaking in {detected_lang}.\n\nUser: {prompt}"
+    # Add user prompt to history
+    chat_context.add_turn(session_id, "user", prompt)
+    messages = chat_context.get_messages(session_id)
 
     payload = {
         "anthropic_version": "bedrock-2023-05-31",
-        "messages": [
-            {
-                "role": "user",
-                "content": [{"type": "text", "text": full_prompt}]
-            }
-        ],
+        "messages": messages,
         "max_tokens": 400,
         "temperature": 0.7,
         "top_k": 250,
@@ -73,10 +69,7 @@ def generate_response_bedrock(prompt, detected_lang=""):
         traceback.print_exc()
         return f"❌ Failed to initialize Bedrock client: {e}"
 
-    max_retries = 5
-    delay = 2  # initial delay
-
-    for attempt in range(1, max_retries + 1):
+    for attempt in range(5):
         try:
             response = client.invoke_model(
                 modelId=model_id,
@@ -86,22 +79,21 @@ def generate_response_bedrock(prompt, detected_lang=""):
             )
 
             result = json.loads(response["body"].read())
+
             if result and "content" in result and len(result["content"]) > 0:
                 answer = result["content"][0]["text"]
-                save_claude_response_to_cache(prompt, answer)  # ✅ Save for future reuse
+                chat_context.add_turn(session_id, "assistant", answer)
+                chat_context.save_session(session_id)
+                save_claude_response_to_cache(prompt, answer)
                 return answer
             else:
-                return "⚠️ Empty or unexpected response from Claude."
+                return "⚠️ Claude returned an empty or invalid response."
 
-        except client.exceptions.ThrottlingException as e:
-            print(f"⚠️ Throttled (attempt {attempt}/{max_retries}). Retrying in {delay}s...")
-            time.sleep(delay)
-            delay *= 2  # Exponential backoff
-
+        except client.exceptions.ThrottlingException:
+            time.sleep(2 * (attempt + 1))
         except ClientError as e:
             traceback.print_exc()
             return f"❌ AWS ClientError: {e}"
-
         except Exception as e:
             traceback.print_exc()
             return f"❌ Unexpected error: {e}"
