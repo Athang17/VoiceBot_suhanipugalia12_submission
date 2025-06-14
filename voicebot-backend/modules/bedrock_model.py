@@ -2,17 +2,20 @@ import boto3
 import json
 import traceback
 
-def generate_response_bedrock(prompt):
+def generate_response_bedrock(prompt, detected_lang=""):
     region = "us-west-2"
     model_id = "anthropic.claude-3-5-sonnet-20240620-v1:0"
 
-    # Prepend system prompt inside the user message
+    # 👇 Prepend system instruction inside the user's message content
     system_instruction = (
         "You are a helpful and concise financial assistant. "
-        "Always reply in the same language as the user (Hindi or English)."
+        "Always respond in the same language as the user. "
+        "If the user speaks in English, respond in English. "
+        "If the user speaks in Hindi, respond in Hindi."
     )
 
-    full_prompt = f"{system_instruction}\n\nUser: {prompt}"
+    # You should pass detected_lang to this function later
+    full_prompt = f"{system_instruction} User is speaking in {detected_lang}. \n\nUser: {prompt}"
 
     payload = {
         "anthropic_version": "bedrock-2023-05-31",

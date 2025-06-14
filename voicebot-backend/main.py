@@ -39,8 +39,8 @@ def transcribe():
     
     try:
         audio.save(filepath)
-        transcript = transcribe_audio(filepath, filename)
-        response_text = generate_response_bedrock(transcript)
+        transcript, detected_lang = transcribe_audio(filepath, filename)
+        response_text = generate_response_bedrock(transcript, detected_lang)
         tts_filepath = synthesize_speech(response_text)
         audio_url = f"/audio/{os.path.basename(tts_filepath)}"
 
