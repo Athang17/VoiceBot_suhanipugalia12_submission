@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_0) and a customer service representative (speaker_1) from a financial institution. The customer is inquiring about the delay in processing their transactions, and the customer service representative is providing explanations and clarifications.",
+    "customer_concerns": "- The customer is concerned about the delay in their transactions being credited, as it was taking longer even on the previous Friday.",
+    "questions_asked": "- The customer asked if the delay in transactions is due to every Saturday and Sunday being bank holidays.\n- The customer also asked if it's only the second and fourth Saturdays that are bank holidays.",
+    "overall_sentiment": "Neutral. The customer's initial concern was addressed, and the customer service representative provided clear explanations to address the customer's queries. The conversation ended amicably with no further issues raised."
+}

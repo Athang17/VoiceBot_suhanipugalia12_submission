@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_0) and a representative (speaker_1) from Lending Club, a lending platform. The customer had made an initial investment of \u20b910,000 on a trial basis and is now discussing the refunds and pre-closure details of his investment.",
+    "customer_concerns": "- The customer had one investment that was cancelled, and the refund for that amount has been received.\n- The customer had another investment that was pre-closed earlier, and he is unsure why the refund amount was received.\n- The customer is trying to understand the differences between the credit score (CIBIL) and the Lending Club score (LDCS) and which one he should focus on.",
+    "questions_asked": "- What is the most important thing the customer should know?\n- Why are the CIBIL and LDCS scores different?\n- Which score should the customer follow - CIBIL or LDCS?",
+    "overall_sentiment": "Neutral. The customer is seeking clarification on the investment details and the scoring systems, and the representative is providing explanations to address the customer's concerns."
+}

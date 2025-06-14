@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer and a representative from Lending Club, a peer-to-peer lending platform. The representative is attempting to contact the customer regarding their existing registration and investment with the platform, but the customer expresses disinterest and requests to be called back later as the account holder is currently sleeping.",
+    "customer_concerns": "- The customer is not interested in the conversation.\n- The account holder is currently sleeping and cannot speak at the moment.",
+    "questions_asked": "- None.",
+    "overall_sentiment": "Negative. The customer expresses disinterest and asks to be called back later, indicating a negative sentiment towards the conversation."
+}

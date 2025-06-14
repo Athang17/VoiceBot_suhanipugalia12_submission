@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_0) and a customer service representative (speaker_1) of a financial institution. The customer is facing issues with login and accessing his account information, particularly with regards to OTP (One-Time Password) not being received and loan agreement not being visible.",
+    "customer_concerns": "- OTP not being received on mobile or email\n- Loan agreement not visible on the website\n- Daily installment option being unavailable",
+    "questions_asked": "- Why is the OTP not being received?\n- Why is the loan agreement not visible?\n- Why is the daily installment option not available?",
+    "overall_sentiment": "Neutral\nThe customer is facing technical issues with the platform, and the customer service representative is trying to assist the customer and provide explanations for the issues faced."
+}

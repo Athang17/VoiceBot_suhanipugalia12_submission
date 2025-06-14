@@ -2,8 +2,32 @@ import boto3
 import json
 import traceback
 import time
+import datetime
+import uuid
+import os
+
 from botocore.exceptions import ClientError
 from parameters.modules.rag_fallback import search_local_knowledge  # 👈 Import fallback
+
+# Folder to cache Claude responses
+AUTO_CACHE_FOLDER = os.path.join(os.path.dirname(__file__), "auto_cached_jsons")
+os.makedirs(AUTO_CACHE_FOLDER, exist_ok=True)
+
+def save_claude_response_to_cache(question, answer):
+    payload = {
+        "source": "auto_cache",
+        "original_question": question,
+        "answer": answer,
+        "timestamp": datetime.datetime.now().isoformat()
+    }
+    filename = f"{uuid.uuid4()}.json"
+    filepath = os.path.join(AUTO_CACHE_FOLDER, filename)
+    try:
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2, ensure_ascii=False)
+        print(f"💾 Saved Claude answer to cache: {filepath}")
+    except Exception as e:
+        print(f"⚠️ Failed to save response: {e}")
 
 def generate_response_bedrock(prompt, detected_lang=""):
     region = "us-west-2"
@@ -12,7 +36,7 @@ def generate_response_bedrock(prompt, detected_lang=""):
     # Step 1: Try retrieving a local match before using Claude
     local_answer = search_local_knowledge(prompt)
     if local_answer:
-        print("✅ Returning answer from local JSON fallback")
+        print("✅ Local answer used (matched with high confidence)")
         return local_answer
 
     # Step 2: Build prompt for Claude if no match found
@@ -60,7 +84,9 @@ def generate_response_bedrock(prompt, detected_lang=""):
 
             result = json.loads(response["body"].read())
             if result and "content" in result and len(result["content"]) > 0:
-                return result["content"][0]["text"]
+                answer = result["content"][0]["text"]
+                save_claude_response_to_cache(prompt, answer)  # ✅ Save for future reuse
+                return answer
             else:
                 return "⚠️ Empty or unexpected response from Claude."
 

@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_1) and a relationship manager (speaker_0) from Lending Club, a peer-to-peer lending platform. The customer had recently added \u20b92 lakh to their account and was inquiring about the automatic debit feature and how the lending process works.",
+    "customer_concerns": "- The customer was unable to set up the auto-debit feature on the Lending Club app.",
+    "questions_asked": "- How does the customer update the auto-debit feature?\n- How does Lending Club lend the money to the borrowers?",
+    "overall_sentiment": "Neutral. The conversation started with the customer's concern, but the relationship manager was able to explain the lending process and address the customer's questions, leading to a resolution."
+}

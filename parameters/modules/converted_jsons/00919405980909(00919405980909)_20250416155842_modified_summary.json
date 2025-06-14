@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer, <PII_NAME>, and a representative from the LinkedIn Club investment platform. The customer had previously made an investment of <PII_AMOUNT> and was seeking information about their portfolio and the investment process.",
+    "customer_concerns": "- None expressed.",
+    "questions_asked": "- How can the customer check the details of their investment portfolio?\n- How will the repayments from borrowers be handled?\n- How much attention/monitoring is required from the customer?",
+    "overall_sentiment": "Neutral. The customer seems satisfied with the information provided by the representative and does not express any significant concerns or issues."
+}

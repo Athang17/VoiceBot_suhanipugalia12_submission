@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_2) and a relationship manager (speaker_1) from the Lending Club platform. The customer has invested in the platform and is seeking clarification on some doubts and concerns.",
+    "customer_concerns": "- The customer is facing issues in getting through to the relationship manager, as the call is often getting disconnected.\n- The customer has some accounts where the amount invested has not been earning any returns (zero point zero one, zero point zero two).",
+    "questions_asked": "- Will the payment made by the customer be directly credited to their bank account?\n- If the loan amount does not reach 100% of the target, will the remaining amount be refunded to the customer?\n- How can the customer check if the loan has been disbursed or not?",
+    "overall_sentiment": "Neutral. The customer seems to have some concerns, but the conversation is focused on resolving them in a polite and professional manner."
+}

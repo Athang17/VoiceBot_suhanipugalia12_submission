@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between an Aditya, a customer service representative from Lending Club, a peer-to-peer (P2P) lending platform, and a customer named Mr. <PII_NAME>. The customer had started investments with Lending Club and the representative is checking if he has any queries or questions related to his investments.",
+    "customer_concerns": "- None expressed",
+    "questions_asked": "- Does lending through Lending Club impact the customer's CIBIL (credit) score?",
+    "overall_sentiment": "Neutral\nThe customer was initially confused about the impact on his credit score, but the representative clarified that there is no impact. The conversation remained calm and informative."
+}

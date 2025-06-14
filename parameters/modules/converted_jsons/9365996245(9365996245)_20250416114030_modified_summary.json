@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer <PII_NAME> and a Relationship Manager from a P2P lending platform. They discuss the customer's investment on the platform and the process of loan repayment.",
+    "customer_concerns": "- None expressed.",
+    "questions_asked": "- Is this the customer's first time investing in P2P lending or has they done it before?\n- What happens if the borrower doesn't repay the loan?",
+    "overall_sentiment": "Positive. The customer seems satisfied with the explanation provided by the Relationship Manager regarding the loan repayment process and the actions taken by the platform in case of non-payment."
+}
