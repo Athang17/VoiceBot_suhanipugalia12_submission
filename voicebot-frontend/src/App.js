@@ -1,17 +1,71 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 function VoiceApp() {
+  // State management
   const [recording, setRecording] = useState(false);
-  const [transcript, setTranscript] = useState('');
-  const [response, setResponse] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [darkMode, setDarkMode] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [playingUrl, setPlayingUrl] = useState(null);
+  const [conversationContext, setConversationContext] = useState([]);
+  
+  // Refs
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const audioRef = useRef(null);
+  const chatEndRef = useRef(null);
+  const [waveform, setWaveform] = useState([]);
+
+  // Apply dark mode to entire app
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+  }, [darkMode]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Generate waveform visualization during recording
+  useEffect(() => {
+    if (recording) {
+      const interval = setInterval(() => {
+        setWaveform(prev => [...prev.slice(-10), Math.random() * 0.5 + 0.5]);
+      }, 100);
+      return () => clearInterval(interval);
+    } else {
+      setWaveform([]);
+    }
+  }, [recording]);
+
+  // Add conversational micro-interactions
+  const addThinkingMessage = () => {
+    const thinkingPhrases = [
+      "Hmm, let me think...",
+      "Checking on that...",
+      "One moment please...",
+      "Let me find that information..."
+    ];
+    const phrase = thinkingPhrases[Math.floor(Math.random() * thinkingPhrases.length)];
+    
+    setMessages(prev => [...prev, {
+      sender: 'bot',
+      text: phrase,
+      id: Date.now() + '-thinking',
+      isThinking: true
+    }]);
+  };
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: { 
+          noiseSuppression: true,
+          echoCancellation: true,
+          autoGainControl: true
+        } 
+      });
+      
       mediaRecorderRef.current = new MediaRecorder(stream);
       chunksRef.current = [];
 
@@ -27,22 +81,39 @@ function VoiceApp() {
       mediaRecorderRef.current.start();
       setRecording(true);
     } catch (err) {
-      alert("Microphone access error: " + err.message);
+      addErrorMessage("Microphone access error: " + err.message);
     }
   };
 
   const stopRecording = () => {
     if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
       setRecording(false);
     }
   };
 
+  const addErrorMessage = (message) => {
+    setMessages(prev => [...prev, {
+      sender: 'system',
+      text: message,
+      timestamp: new Date().toLocaleTimeString(),
+      id: Date.now() + '-error'
+    }]);
+  };
+
   const sendAudioToBackend = async (audioBlob) => {
     setLoading(true);
+    addThinkingMessage();
+    
     try {
       const formData = new FormData();
       formData.append("audio", audioBlob, "recording.mp3");
+      
+      // Add conversation context to help with memory
+      if (conversationContext.length > 0) {
+        formData.append("context", JSON.stringify(conversationContext.slice(-3))); // Last 3 exchanges
+      }
 
       const res = await fetch("http://localhost:5000/transcribe", {
         method: "POST",
@@ -52,59 +123,220 @@ function VoiceApp() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
 
-      setTranscript(data.transcript);
-      setResponse(data.response);
+      // Remove thinking message
+      setMessages(prev => prev.filter(msg => !msg.isThinking));
 
-      // Play the audio response if available
-      if (data.audio_url) {
-        audioRef.current = new Audio(`http://localhost:5000${data.audio_url}`);
-        audioRef.current.play();
-      }      
+      // Add user message
+      const userMessage = {
+        sender: 'user',
+        text: data.transcript,
+        timestamp: new Date().toLocaleTimeString(),
+        id: Date.now() + '-user'
+      };
+      
+      setMessages(prev => [...prev, userMessage]);
+
+      // Add bot response
+      const botMessage = {
+        sender: 'bot',
+        text: data.response,
+        audioUrl: data.audio_url,
+        timestamp: new Date().toLocaleTimeString(),
+        id: Date.now() + '-bot',
+        suggestions: data.suggestions || []
+      };
+      
+      setMessages(prev => [...prev, botMessage]);
+
+      // Update conversation context
+      setConversationContext(prev => [...prev, {
+        user: data.transcript,
+        bot: data.response
+      }]);
     } catch (err) {
-      alert("Error: " + err.message);
+      setMessages(prev => prev.filter(msg => !msg.isThinking));
+      addErrorMessage("Error: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const toggleAudio = (url) => {
+    if (playingUrl === url) {
+      audioRef.current.pause();
+      setPlayingUrl(null);
+    } else {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      const audio = new Audio(`http://localhost:5000${url}`);
+      audioRef.current = audio;
+      setPlayingUrl(url);
+      audio.play();
+      audio.onended = () => setPlayingUrl(null);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setMessages(prev => [...prev, {
+      sender: 'user',
+      text: suggestion,
+      timestamp: new Date().toLocaleTimeString(),
+      id: Date.now() + '-suggestion'
+    }]);
+    
+    // Simulate sending this as a query
+    setTimeout(() => {
+      fetch("http://localhost:5000/query", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: suggestion,
+          context: conversationContext.slice(-3)
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        setMessages(prev => [...prev, {
+          sender: 'bot',
+          text: data.response,
+          audioUrl: data.audio_url,
+          timestamp: new Date().toLocaleTimeString(),
+          id: Date.now() + '-bot-response',
+          suggestions: data.suggestions || []
+        }]);
+        
+        setConversationContext(prev => [...prev, {
+          user: suggestion,
+          bot: data.response
+        }]);
+      });
+    }, 300);
+  };
+
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-      <h2>Voice Bot</h2>
-      
-      <button 
-        onClick={recording ? stopRecording : startRecording}
-        style={{
-          padding: '10px 20px',
-          background: recording ? '#ff4444' : '#4CAF50',
-          color: 'white',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer'
-        }}
-      >
-        {recording ? '⏹ Stop Recording' : '🎤 Start Recording'}
-      </button>
+    <div className={`min-h-screen flex flex-col p-6 transition-colors duration-300 ${darkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
+      {/* Header with dark mode toggle */}
+      <div className="flex justify-between items-center mb-4 max-w-3xl w-full mx-auto">
+        <h1 className="text-2xl font-bold">🎙️ Advanced Voice Assistant</h1>
+        <button
+          onClick={() => setDarkMode(!darkMode)}
+          className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
+        >
+          {darkMode ? '🌞 Light Mode' : '🌙 Dark Mode'}
+        </button>
+      </div>
 
-      {loading && <p>Processing...</p>}
+      {/* Chat history */}
+      <div className={`flex-1 w-full max-w-3xl mx-auto overflow-y-auto rounded-lg shadow p-4 mb-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
+           style={{ maxHeight: '60vh' }}>
+        {messages.length === 0 ? (
+          <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            <p className="mb-2">Start by pressing the microphone button</p>
+            <p className="text-sm">Try speaking in English or Hindi!</p>
+          </div>
+        ) : (
+          messages.map((msg) => (
+            <div 
+              key={msg.id} 
+              className={`flex mb-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div className={`px-4 py-2 rounded-lg max-w-xs ${msg.sender === 'user'
+                ? 'bg-blue-500 text-white animate-slide-in-right'
+                : msg.sender === 'bot'
+                  ? `${darkMode ? 'bg-gray-700' : 'bg-gray-200'} ${darkMode ? 'text-white' : 'text-gray-800'} animate-slide-in-left`
+                  : 'bg-red-100 text-red-800'}`}>
+                <div className="text-xs opacity-80 mb-1">
+                  {msg.sender === 'user' ? 'You' : msg.sender === 'bot' ? 'Assistant' : 'System'} • {msg.timestamp}
+                </div>
+                <p>{msg.text}</p>
+                {msg.sender === 'bot' && msg.audioUrl && (
+                  <button
+                    onClick={() => toggleAudio(msg.audioUrl)}
+                    className={`mt-1 text-xs px-2 py-1 rounded-full ${playingUrl === msg.audioUrl
+                      ? 'bg-blue-600 text-white'
+                      : darkMode
+                        ? 'bg-gray-600 text-blue-300'
+                        : 'bg-blue-100 text-blue-800'}`}
+                  >
+                    {playingUrl === msg.audioUrl ? '⏸ Pause' : '🔊 Play'}
+                  </button>
+                )}
+                {msg.sender === 'bot' && msg.suggestions?.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {msg.suggestions.map((suggestion, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className={`text-xs px-2 py-1 rounded-full ${darkMode 
+                          ? 'bg-gray-600 text-blue-300 hover:bg-gray-500' 
+                          : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}`}
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+        <div ref={chatEndRef} />
+      </div>
 
-      <div style={{ marginTop: '20px' }}>
-        {transcript && (
-          <div style={{ marginBottom: '10px' }}>
-            <h4>You said:</h4>
-            <p>{transcript}</p>
+      {/* Recording button with status */}
+      <div className="flex flex-col items-center gap-2">
+        {recording && (
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+            <span className="text-sm text-red-500">Recording</span>
+            <div className="flex items-center gap-1 h-6">
+              {waveform.map((height, i) => (
+                <div 
+                  key={i} 
+                  className="w-1 bg-red-500 rounded-full" 
+                  style={{ height: `${height * 20}px` }}
+                />
+              ))}
+            </div>
           </div>
         )}
-
-        {response && (
-          <div>
-            <h4>Response:</h4>
-            <p>{response}</p>
-          </div>
+        
+        <button
+          onClick={recording ? stopRecording : startRecording}
+          className={`px-6 py-3 rounded-full text-white font-bold shadow-lg transition-all ${
+            recording ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+          }`}
+        >
+          {recording ? '⏹ Stop Recording' : '🎤 Start Recording'}
+        </button>
+        
+        {loading && (
+          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} animate-pulse`}>
+            Processing your voice...
+          </p>
         )}
       </div>
 
-      {/* Hidden audio element for playback */}
-      <audio ref={audioRef} style={{ display: 'none' }} />
+      {/* Inline styles for animations */}
+      <style>{`
+        @keyframes slide-in-right {
+          from { transform: translateX(20px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slide-in-left {
+          from { transform: translateX(-20px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        .animate-slide-in-right {
+          animation: slide-in-right 0.3s ease-out forwards;
+        }
+        .animate-slide-in-left {
+          animation: slide-in-left 0.3s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 }
