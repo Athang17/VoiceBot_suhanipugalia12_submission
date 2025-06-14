@@ -1,6 +1,8 @@
 import boto3
 import os
 import uuid
+from dotenv import load_dotenv
+load_dotenv()
 
 region = "us-west-2"
 polly = boto3.client("polly", region_name=region)
