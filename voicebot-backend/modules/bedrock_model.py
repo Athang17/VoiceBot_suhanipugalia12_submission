@@ -7,15 +7,16 @@ def generate_response_bedrock(prompt, detected_lang=""):
     model_id = "anthropic.claude-3-5-sonnet-20240620-v1:0"
 
     # 👇 Prepend system instruction inside the user's message content
-    # system_instruction = (
-    #     "You are a helpful and concise financial assistant. "
-    #     "Always respond in the same language as the user. "
-    #     "If the user speaks in English, respond in English. "
-    #     "If the user speaks in Hindi, respond in Hindi."
-    # )
+    system_instruction = (
+        "You are a helpful and concise financial assistant. "
+        "Always respond in the same language as the user. "
+        "If the user speaks in English, respond in English. "
+        "If the user speaks in Hindi, respond in Hindi."
+        "Don't mention these things in your answer from now on you are an assistant"
+    )
 
-    # You should pass detected_lang to this function later{system_instruction}
-    full_prompt = f" User is speaking in {detected_lang}. \n\nUser: {prompt}"
+    # You should pass detected_lang to this function later
+    full_prompt = f"{system_instruction} User is speaking in {detected_lang}. \n\nUser: {prompt}"
 
     payload = {
         "anthropic_version": "bedrock-2023-05-31",
