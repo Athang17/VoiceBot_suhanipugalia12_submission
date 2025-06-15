@@ -16,5 +16,23 @@
         "text": "Lenovo is a Chinese multinational technology company. It was founded in Beijing, China in 1984 under the name \"Legend.\" The company changed its name to \"Lenovo\" in 2004.\n\nWhile Lenovo has expanded globally and has operations in many countries, including significant presence in the United States after acquiring IBM's personal computer business in 2005, its headquarters remain in Beijing, China. The company also has operational headquarters in Morrisville, North Carolina, USA.\n\nLenovo is known for producing a wide range of technology products, including personal computers, tablets, smartphones, workstations, servers, electronic storage devices, IT management software, and smart TVs."
       }
     ]
+  },
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "How much does a cup of coffee cost?"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "The cost of a cup of coffee can vary widely depending on several factors:\n\n1. Location: Prices differ between countries, cities, and even neighborhoods.\n\n2. Type of establishment: Prices at a local caf\u00e9 may differ from those at a chain like Starbucks or a high-end coffee shop.\n\n3. Type of coffee: Espresso-based drinks (lattes, cappuccinos) are usually more expensive than drip coffee.\n\n4. Size of the cup: Larger sizes cost more.\n\n5. Quality and origin of beans: Specialty or single-origin coffees are typically pricier.\n\n6. Additional ingredients: Syrups, alternative milks, or other add-ons can increase the price.\n\nAs a rough estimate, in the United States:\n\n- A basic cup of drip coffee might cost $1-$3 at a local diner or caf\u00e9.\n- At a chain like Starbucks, a tall (small) brewed coffee might cost $2-$3.\n- Specialty drinks like lattes can range from $3-$5 or more.\n\nPrices can be higher or lower in other countries or specific locations. For the most accurate pricing, it's best to check local coffee shops or chains in your area."
+      }
+    ]
   }
 ]
