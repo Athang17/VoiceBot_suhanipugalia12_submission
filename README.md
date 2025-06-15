@@ -46,6 +46,7 @@ VoiceBot_suhanipugalia12_submission is a versatile developer toolset for creatin
 - Sentiment analysis
 - User engagement enhancement
 - Support automation
+- Pdf summary of the conversation
 
 ## Why VoiceBot?
 
@@ -87,41 +88,58 @@ cd VoiceBot_suhanipugalia12_submission
 npm install
 ```
 
+4. Create a virtual environment and activate it:
+```bash
+python -m venv venv
+venv\Scripts\activate  # On Windows
+# or
+source venv/bin/activate  # On macOS/Linux
+```
+
+5. Install Python dependencies:
+
 **Using `pip`:**
 ```bash
 pip install -r requirements.txt -q --progress-bar off && pip install flask flask_cors pydub vosk openai tiktoken
 ```
 
+6. Run the application:
+```
+python main.py
+```
 ---
 
 ### Usage
 
 Run the project with:
 
+1. Navigate to the frontend directory:
+```bash
+cd voicebot-frontend
+```
+
+2. Run the frontend
 **Using `npm`:**
 ```bash
 npm start
 ```
 
-**Using `pip`:**
-```bash
-python [entrypoint].py
-```
+
 
 ---
 
 ## Testing
 
-`VoiceBot_suhanipugalia12_submission` uses the `test_framework` test framework. Run the test suite with:
 
-**Using `npm`:**
+1. Navigate to the demo directory:
 ```bash
-npm test
+cd demo
 ```
 
+2. Run the Backend
 **Using `pip`:**
 ```bash
-pytest
+python run_inference.py 
 ```
 
 ---
