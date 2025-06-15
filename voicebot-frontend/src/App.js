@@ -29,10 +29,6 @@ function VoiceApp() {
   const [isLoadingStocks, setIsLoadingStocks] = useState(false);
   const [marketStatus, setMarketStatus] = useState('Delayed');
   const [stocks, setStocks] = useState([
-    { symbol: 'RELIANCE', price: 2856.15, change: 12.50 },
-    { symbol: 'TCS', price: 3845.75, change: -25.75 },
-    { symbol: 'HDFCBANK', price: 1658.20, change: 8.20 },
-    { symbol: 'INFY', price: 1520.50, change: 15.25 }
   ]);
 
   const [isLoadingNews, setIsLoadingNews] = useState(false);
@@ -124,9 +120,38 @@ function VoiceApp() {
   }, []);
 
   // Stock Market Widget Component
-<div>
-  <StockMarketWidget darkMode={darkMode} />
-</div>
+  const StockMarketWidget = () => (
+    <div className={`p-3 rounded-lg shadow ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="font-semibold">Market Summary</h2>
+        <span className={`text-xs px-2 py-1 rounded ${darkMode ? 'bg-gray-700 text-yellow-400' : 'bg-yellow-100 text-yellow-800'}`}>
+          {marketStatus}
+        </span>
+      </div>
+      <div className="space-y-2">
+        {stocks.map((stock, index) => (
+          <div key={index} className="flex justify-between items-center">
+            <span className="font-medium">{stock.symbol}</span>
+            <div className="flex items-center">
+              <span className="mr-2">{stock.price.toFixed(2)}</span>
+              <span className={`text-xs px-1 rounded ${stock.change >= 0 
+                ? (darkMode ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-800') 
+                : (darkMode ? 'bg-red-900 text-red-300' : 'bg-red-100 text-red-800')}`}>
+                {stock.change >= 0 ? '+' : ''}{stock.change.toFixed(2)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex justify-end">
+        <button 
+          className={`text-xs px-3 py-1 rounded ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-200 hover:bg-gray-300 text-gray-800'}`}
+        >
+          Export PDF
+        </button>
+      </div>
+    </div>
+  );
 
   // News Widget Component
   const NewsWidget = () => (
@@ -704,15 +729,6 @@ function VoiceApp() {
 
   return (
     <div className={`min-h-screen flex flex-col p-4 transition-colors duration-300 ${darkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
-      {/* Accessibility button */}
-      <button 
-        onClick={() => setShowAccessibilityPanel(!showAccessibilityPanel)}
-        className={`fixed right-4 bottom-4 z-40 p-3 rounded-full shadow-lg ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-800'}`}
-        aria-label="Accessibility settings"
-      >
-        ♿
-      </button>
-      
       {showAccessibilityPanel && <AccessibilityPanel />}
       
       <div className="flex flex-col lg:flex-row gap-4 w-full max-w-full mx-auto h-[calc(100vh-2rem)]">
@@ -725,17 +741,24 @@ function VoiceApp() {
               {activeLanguage === 'hi' ? '🎙️ आवाज सहायक' : '🎙️ Advanced Voice Assistant'}
             </h1>
             <div className="flex gap-2">
-            <button
-              onClick={toggleLanguage}
-              className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
-            >
-              {activeLanguage === 'hi' ? '🇮🇳 English' : '🇮🇳 हिंदी'}
-            </button>
+              <button
+                onClick={toggleLanguage}
+                className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
+              >
+                {activeLanguage === 'hi' ? '🇮🇳 English' : '🇮🇳 हिंदी'}
+              </button>
               <button
                 onClick={() => setDarkMode(!darkMode)}
                 className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
               >
                 {darkMode ? '🌞 Light Mode' : '🌙 Dark Mode'}
+              </button>
+              <button 
+                onClick={() => setShowAccessibilityPanel(!showAccessibilityPanel)}
+                className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
+                aria-label="Accessibility settings"
+              >
+                Accessibility
               </button>
             </div>
           </div>
