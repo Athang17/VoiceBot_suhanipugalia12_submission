@@ -1,9 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-// import axios from 'axios';
 import ConversationSummary from './components/ConversationSummary';
-
 import StockMarketWidget from './components/StockMarketWidget';
-
 import NewsWidget from './components/NewsWidget';
 
 function VoiceApp() {
@@ -23,8 +20,6 @@ function VoiceApp() {
   const [waveform, setWaveform] = useState([]);
   const [fontSize, setFontSize] = useState('medium'); // 'small', 'medium', 'large'
   const [showAccessibilityPanel, setShowAccessibilityPanel] = useState(false);
-
-  // Add these state variables at the top with your other states
   const [autoStopMessageShown, setAutoStopMessageShown] = useState(false);
 
   // Stock market related states
@@ -52,7 +47,6 @@ function VoiceApp() {
       title: 'Nifty hits all-time high of 22,000',
       source: 'Moneycontrol',
       publishedAt: new Date(Date.now() - 2*60*60*1000)
-    
     }
   ]);
 
@@ -64,8 +58,8 @@ function VoiceApp() {
   const audioRef = useRef(null);
   const chatEndRef = useRef(null);
   const noiseLevelIntervalRef = useRef(null);
-  const silenceTimerRef = useRef(null); // Changed to useRef for better cleanup
-  const lastSoundTimeRef = useRef(null); // Changed to useRef for better cleanup
+  const silenceTimerRef = useRef(null);
+  const lastSoundTimeRef = useRef(null);
 
   // Font size mapping
   const fontSizeMap = {
@@ -125,43 +119,6 @@ function VoiceApp() {
     };
   }, []);
 
-  // Stock Market Widget Component
-// Stock Market Widget Component
-{/* Stocks Widget */}
-<StockMarketWidget darkMode={darkMode} />
-
-{/* News Widget */}
-<NewsWidget
-  darkMode={darkMode}
-  messages={messages}
-  activeLanguage={activeLanguage}
-/>
-
-  // News Widget Component
-  // const NewsWidget = () => (
-  //   <div className={`p-3 rounded-lg shadow ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
-  //     <h2 className="font-semibold mb-3">Business Headlines</h2>
-  //     <div className="space-y-3">
-  //       {news.map((item, index) => (
-  //         <div key={index} className="text-sm">
-  //           <p className="font-medium">{item.title}</p>
-  //           <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-  //             {item.source}
-  //           </p>
-  //         </div>
-  //       ))}
-  //     </div>
-  //     <div className="w-65 lg:w-80 flex flex-col gap-3 h-full">
-  //       {/* Existing widgets... */}
-  //       <ConversationSummary 
-  //         messages={messages} 
-  //         darkMode={darkMode} 
-  //         activeLanguage={activeLanguage} 
-  //       />
-  //     </div>
-  //   </div>
-  // );
-
   // Apply dark mode to entire app
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode);
@@ -170,7 +127,6 @@ function VoiceApp() {
   // Keyboard shortcuts handler
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Spacebar for voice recording
       if (inputMode === 'voice' && !loading && e.code === 'Space') {
         e.preventDefault();
         if (recording) {
@@ -180,30 +136,25 @@ function VoiceApp() {
         }
       }
       
-      // Tab to switch input modes
       if (e.key === 'Tab' && !loading) {
         e.preventDefault();
         setInputMode(prev => prev === 'voice' ? 'text' : 'voice');
       }
       
-      // Escape to close accessibility panel
       if (e.key === 'Escape' && showAccessibilityPanel) {
         setShowAccessibilityPanel(false);
       }
       
-      // Ctrl+Alt+D for dark mode toggle
       if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'd') {
         e.preventDefault();
         setDarkMode(prev => !prev);
       }
       
-      // Ctrl+Alt+L for language toggle
       if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'l') {
         e.preventDefault();
         toggleLanguage();
       }
       
-      // Ctrl+Alt+A for accessibility panel toggle
       if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'a') {
         e.preventDefault();
         setShowAccessibilityPanel(prev => !prev);
@@ -248,7 +199,6 @@ function VoiceApp() {
     return () => clearInterval(noiseLevelIntervalRef.current);
   }, [recording, noiseLevel]);
 
-  // Add conversational micro-interactions
   const addThinkingMessage = () => {
     const thinkingPhrases = {
       en: ["Hmm, let me think...", "Checking on that...", "One moment please...", "Let me find that information..."],
@@ -268,7 +218,6 @@ function VoiceApp() {
     }]);
   };
 
-  // Advanced noise cancellation setup
   const setupAudioContext = async (stream) => {
     try {
       audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
@@ -299,7 +248,6 @@ function VoiceApp() {
       mediaRecorderRef.current = new MediaRecorder(stream);
       chunksRef.current = [];
   
-      // Add audio processor for silence detection
       const audioContext = audioContextRef.current;
       const analyser = audioContext.createAnalyser();
       const microphone = audioContext.createMediaStreamSource(stream);
@@ -320,19 +268,16 @@ function VoiceApp() {
       lastSoundTimeRef.current = Date.now();
       setAutoStopMessageShown(false);
       
-      // Clear any existing timer
       if (silenceTimerRef.current) {
         clearInterval(silenceTimerRef.current);
       }
       
-      // New silence detection with audio level monitoring
       silenceTimerRef.current = setInterval(() => {
-        // Check audio level
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
         analyser.getByteFrequencyData(dataArray);
         
-        const soundDetected = dataArray.some(level => level > 5); // Threshold
+        const soundDetected = dataArray.some(level => level > 5);
         
         if (soundDetected) {
           lastSoundTimeRef.current = Date.now();
@@ -343,7 +288,7 @@ function VoiceApp() {
             'Recording stopped automatically: No speech detected for 1 second');
           setAutoStopMessageShown(true);
         }
-      }, 200); // Check every 200ms
+      }, 200);
   
       if (noiseLevel > 0.5) {
         addSystemMessage("Noisy environment detected. Speak clearly for best results.");
@@ -353,7 +298,6 @@ function VoiceApp() {
     }
   };
     
-  // Modify stopRecording to clear the silence timer
   const stopRecording = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
@@ -387,7 +331,6 @@ function VoiceApp() {
     }]);
   };
 
-  // Enhanced response handling with language detection
   const handleBotResponse = (data) => {
     if (data.language && data.language !== activeLanguage) {
       setActiveLanguage(data.language);
@@ -636,9 +579,8 @@ function VoiceApp() {
   const toggleLanguage = () => {
     const newLanguage = activeLanguage === 'en' ? 'hi' : 'en';
     setActiveLanguage(newLanguage);
-    // Show message in the new language
     if (newLanguage === 'hi') {
-      addSystemMessage('भाषा हिंदी में बदल गई'); // "Language changed to Hindi" in Hindi
+      addSystemMessage('भाषा हिंदी में बदल गई');
     } else {
       addSystemMessage('Language switched to English');
     }
@@ -713,15 +655,6 @@ function VoiceApp() {
 
   return (
     <div className={`min-h-screen flex flex-col p-4 transition-colors duration-300 ${darkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
-      {/* Accessibility button */}
-      <button 
-        onClick={() => setShowAccessibilityPanel(!showAccessibilityPanel)}
-        className={`fixed right-4 bottom-4 z-40 p-3 rounded-full shadow-lg ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-800'}`}
-        aria-label="Accessibility settings"
-      >
-        ♿
-      </button>
-      
       {showAccessibilityPanel && <AccessibilityPanel />}
       
       <div className="flex flex-col lg:flex-row gap-4 w-full max-w-full mx-auto h-[calc(100vh-2rem)]">
@@ -734,17 +667,23 @@ function VoiceApp() {
               {activeLanguage === 'hi' ? '🎙️ आवाज सहायक' : '🎙️ Advanced Voice Assistant'}
             </h1>
             <div className="flex gap-2">
-            <button
-              onClick={toggleLanguage}
-              className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
-            >
-              {activeLanguage === 'hi' ? '🇮🇳 English' : '🇮🇳 हिंदी'}
-            </button>
+              <button
+                onClick={toggleLanguage}
+                className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
+              >
+                {activeLanguage === 'hi' ? '🇮🇳 English' : '🇮🇳 हिंदी'}
+              </button>
+              <button
+                onClick={() => setShowAccessibilityPanel(!showAccessibilityPanel)}
+                className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
+              >
+                Accessibility
+              </button>
               <button
                 onClick={() => setDarkMode(!darkMode)}
                 className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
               >
-                {darkMode ? '🌞 Light Mode' : '🌙 Dark Mode'}
+                {darkMode ? '🌞 Light' : '🌙 Dark'}
               </button>
             </div>
           </div>
@@ -766,7 +705,7 @@ function VoiceApp() {
             </div>
           )}
 
-          {/* Increased chat area height */}
+          {/* Chat area */}
           <div className={`flex-1 w-full max-w-3xl mx-auto overflow-y-auto rounded-lg shadow p-4 mb-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
                style={{ height: '70vh' }}>
             {messages.length === 0 ? (
@@ -986,10 +925,10 @@ function VoiceApp() {
           </div>
 
           {/* Stocks Widget */}
-          <StockMarketWidget />
+          <StockMarketWidget darkMode={darkMode} />
 
           {/* News Widget */}
-          <NewsWidget />
+          <NewsWidget darkMode={darkMode} />
         </div>
       </div>
 
