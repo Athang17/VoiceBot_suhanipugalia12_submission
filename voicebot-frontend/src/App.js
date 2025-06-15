@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 // import axios from 'axios';
 import ConversationSummary from './components/ConversationSummary';
 
+import StockMarketWidget from './components/StockMarketWidget';
+
 function VoiceApp() {
   // State management
   const [recording, setRecording] = useState(false);
@@ -17,6 +19,11 @@ function VoiceApp() {
   const [noiseLevel, setNoiseLevel] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [waveform, setWaveform] = useState([]);
+  const [fontSize, setFontSize] = useState('medium'); // 'small', 'medium', 'large'
+  const [showAccessibilityPanel, setShowAccessibilityPanel] = useState(false);
+
+  // Add these state variables at the top with your other states
+  const [autoStopMessageShown, setAutoStopMessageShown] = useState(false);
 
   // Stock market related states
   const [isLoadingStocks, setIsLoadingStocks] = useState(false);
@@ -55,34 +62,71 @@ function VoiceApp() {
   const audioRef = useRef(null);
   const chatEndRef = useRef(null);
   const noiseLevelIntervalRef = useRef(null);
+  const silenceTimerRef = useRef(null); // Changed to useRef for better cleanup
+  const lastSoundTimeRef = useRef(null); // Changed to useRef for better cleanup
+
+  // Font size mapping
+  const fontSizeMap = {
+    small: {
+      base: 'text-sm',
+      chat: 'text-sm',
+      input: 'text-sm',
+      widget: 'text-xs'
+    },
+    medium: {
+      base: 'text-base',
+      chat: 'text-base',
+      input: 'text-base',
+      widget: 'text-sm'
+    },
+    large: {
+      base: 'text-lg',
+      chat: 'text-lg',
+      input: 'text-lg',
+      widget: 'text-base'
+    }
+  };
+
+  // Keyboard shortcuts
+  const keyboardShortcuts = [
+    { key: 'Space', action: 'Start/stop voice recording' },
+    { key: 'Tab', action: 'Switch between input modes' },
+    { key: 'Esc', action: 'Close accessibility panel' },
+    { key: 'Ctrl + Alt + D', action: 'Toggle dark mode' },
+    { key: 'Ctrl + Alt + L', action: 'Toggle language' },
+    { key: 'Ctrl + Alt + A', action: 'Toggle accessibility panel' }
+  ];
+
+  // Apply font size to document
+  useEffect(() => {
+    document.documentElement.style.fontSize = 
+      fontSize === 'small' ? '14px' : 
+      fontSize === 'medium' ? '16px' : '18px';
+  }, [fontSize]);
+
+  // Cleanup effects
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+      if (silenceTimerRef.current) {
+        clearInterval(silenceTimerRef.current);
+      }
+      if (noiseLevelIntervalRef.current) {
+        clearInterval(noiseLevelIntervalRef.current);
+      }
+    };
+  }, []);
 
   // Stock Market Widget Component
-  const StockMarketWidget = () => (
-    <div className={`p-3 rounded-lg shadow ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
-      <div className="flex justify-between items-center mb-3">
-        <h2 className="font-semibold">Indian Market</h2>
-        <span className={`text-xs px-2 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-          {marketStatus}
-        </span>
-      </div>
-      
-      <div className="space-y-3">
-        {stocks.map((stock) => (
-          <div key={stock.symbol} className="flex justify-between items-center">
-            <span className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-              {stock.symbol}
-            </span>
-            <span className={`text-sm ml-4 ${
-              stock.change >= 0 ? 'text-green-500' : 'text-red-500'
-            }`}>
-              {stock.change >= 0 ? '+' : ''}{stock.change}%
-            </span>
-          </div>
-        ))}
-      </div>
-      
-    </div>
-  );
+<div>
+  <StockMarketWidget darkMode={darkMode} />
+</div>
 
   // News Widget Component
   const NewsWidget = () => (
@@ -107,7 +151,6 @@ function VoiceApp() {
         />
       </div>
     </div>
-    
   );
 
   // Apply dark mode to entire app
@@ -115,27 +158,55 @@ function VoiceApp() {
     document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
 
-  // Add this useEffect hook to your existing hooks section
+  // Keyboard shortcuts handler
   useEffect(() => {
-  const handleKeyDown = (e) => {
-    // Only trigger if we're in voice input mode and not currently loading
-    if (inputMode === 'voice' && !loading && e.code === 'Space') {
-      e.preventDefault(); // Prevent spacebar from scrolling the page
-      
-      if (recording) {
-        stopRecording();
-      } else {
-        startRecording();
+    const handleKeyDown = (e) => {
+      // Spacebar for voice recording
+      if (inputMode === 'voice' && !loading && e.code === 'Space') {
+        e.preventDefault();
+        if (recording) {
+          stopRecording();
+        } else {
+          startRecording();
+        }
       }
-    }
-  };
+      
+      // Tab to switch input modes
+      if (e.key === 'Tab' && !loading) {
+        e.preventDefault();
+        setInputMode(prev => prev === 'voice' ? 'text' : 'voice');
+      }
+      
+      // Escape to close accessibility panel
+      if (e.key === 'Escape' && showAccessibilityPanel) {
+        setShowAccessibilityPanel(false);
+      }
+      
+      // Ctrl+Alt+D for dark mode toggle
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        setDarkMode(prev => !prev);
+      }
+      
+      // Ctrl+Alt+L for language toggle
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'l') {
+        e.preventDefault();
+        toggleLanguage();
+      }
+      
+      // Ctrl+Alt+A for accessibility panel toggle
+      if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        setShowAccessibilityPanel(prev => !prev);
+      }
+    };
 
-  window.addEventListener('keydown', handleKeyDown);
-  
-  return () => {
-    window.removeEventListener('keydown', handleKeyDown);
-  };
-  }, [inputMode, loading, recording]); // Dependencies ensure we always have fresh values
+    window.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [inputMode, loading, recording, showAccessibilityPanel]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -167,19 +238,6 @@ function VoiceApp() {
     
     return () => clearInterval(noiseLevelIntervalRef.current);
   }, [recording, noiseLevel]);
-
-  // Clean up audio on unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
-    };
-  }, []);
 
   // Add conversational micro-interactions
   const addThinkingMessage = () => {
@@ -231,19 +289,53 @@ function VoiceApp() {
       
       mediaRecorderRef.current = new MediaRecorder(stream);
       chunksRef.current = [];
-
+  
+      // Add audio processor for silence detection
+      const audioContext = audioContextRef.current;
+      const analyser = audioContext.createAnalyser();
+      const microphone = audioContext.createMediaStreamSource(stream);
+      microphone.connect(analyser);
+      analyser.fftSize = 512;
+      
       mediaRecorderRef.current.ondataavailable = (e) => {
         chunksRef.current.push(e.data);
       };
-
+  
       mediaRecorderRef.current.onstop = async () => {
         const blob = new Blob(chunksRef.current, { type: "audio/mp3" });
         await sendAudioToBackend(blob);
       };
-
+  
       mediaRecorderRef.current.start(100);
       setRecording(true);
+      lastSoundTimeRef.current = Date.now();
+      setAutoStopMessageShown(false);
       
+      // Clear any existing timer
+      if (silenceTimerRef.current) {
+        clearInterval(silenceTimerRef.current);
+      }
+      
+      // New silence detection with audio level monitoring
+      silenceTimerRef.current = setInterval(() => {
+        // Check audio level
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteFrequencyData(dataArray);
+        
+        const soundDetected = dataArray.some(level => level > 5); // Threshold
+        
+        if (soundDetected) {
+          lastSoundTimeRef.current = Date.now();
+        } else if (Date.now() - lastSoundTimeRef.current > 1000 && !autoStopMessageShown) {
+          stopRecording();
+          addSystemMessage(activeLanguage === 'hi' ? 
+            'रिकॉर्डिंग स्वतः बंद: 1 सेकंड तक कोई आवाज़ नहीं' : 
+            'Recording stopped automatically: No speech detected for 1 second');
+          setAutoStopMessageShown(true);
+        }
+      }, 200); // Check every 200ms
+  
       if (noiseLevel > 0.5) {
         addSystemMessage("Noisy environment detected. Speak clearly for best results.");
       }
@@ -251,12 +343,18 @@ function VoiceApp() {
       addErrorMessage("Microphone access error: " + err.message);
     }
   };
-
+    
+  // Modify stopRecording to clear the silence timer
   const stopRecording = () => {
-    if (mediaRecorderRef.current) {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
       setRecording(false);
+      
+      if (silenceTimerRef.current) {
+        clearInterval(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
     }
   };
 
@@ -529,11 +627,94 @@ function VoiceApp() {
   const toggleLanguage = () => {
     const newLanguage = activeLanguage === 'en' ? 'hi' : 'en';
     setActiveLanguage(newLanguage);
-    addSystemMessage(`Language switched to ${newLanguage === 'hi' ? 'Hindi' : 'English'}`);
+    // Show message in the new language
+    if (newLanguage === 'hi') {
+      addSystemMessage('भाषा हिंदी में बदल गई'); // "Language changed to Hindi" in Hindi
+    } else {
+      addSystemMessage('Language switched to English');
+    }
   };
+
+  // Accessibility Panel Component
+  const AccessibilityPanel = () => (
+    <div className={`fixed right-4 bottom-4 z-50 p-4 rounded-lg shadow-lg ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}
+         style={{ width: '300px' }}>
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="font-bold">Accessibility Settings</h3>
+        <button 
+          onClick={() => setShowAccessibilityPanel(false)}
+          className={`p-1 rounded-full ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+          aria-label="Close accessibility panel"
+        >
+          ✕
+        </button>
+      </div>
+      
+      <div className="space-y-4">
+        <div>
+          <h4 className="font-medium mb-2">Font Size</h4>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setFontSize('small')}
+              className={`px-3 py-1 rounded-full ${fontSize === 'small' 
+                ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
+                : (darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700')}`}
+            >
+              Small
+            </button>
+            <button
+              onClick={() => setFontSize('medium')}
+              className={`px-3 py-1 rounded-full ${fontSize === 'medium' 
+                ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
+                : (darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700')}`}
+            >
+              Medium
+            </button>
+            <button
+              onClick={() => setFontSize('large')}
+              className={`px-3 py-1 rounded-full ${fontSize === 'large' 
+                ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
+                : (darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700')}`}
+            >
+              Large
+            </button>
+          </div>
+        </div>
+        
+        <div>
+          <h4 className="font-medium mb-2">Keyboard Shortcuts</h4>
+          <div className={`text-sm ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} p-2 rounded`}>
+            <ul className="space-y-1">
+              {keyboardShortcuts.map((shortcut, index) => (
+                <li key={index} className="flex justify-between">
+                  <span className="font-mono bg-gray-600 text-white px-1 rounded">{shortcut.key}</span>
+                  <span>{shortcut.action}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        
+        <div className="text-xs opacity-70">
+          <p>For screen reader users: All interactive elements have proper ARIA labels.</p>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className={`min-h-screen flex flex-col p-4 transition-colors duration-300 ${darkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
+      {/* Accessibility button */}
+      <button 
+        onClick={() => setShowAccessibilityPanel(!showAccessibilityPanel)}
+        className={`fixed right-4 bottom-4 z-40 p-3 rounded-full shadow-lg ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-800'}`}
+        aria-label="Accessibility settings"
+      >
+        ♿
+      </button>
+      
+      {showAccessibilityPanel && <AccessibilityPanel />}
+      
       <div className="flex flex-col lg:flex-row gap-4 w-full max-w-full mx-auto h-[calc(100vh-2rem)]">
         
         {/* Left column - Chat interface */}
@@ -544,12 +725,12 @@ function VoiceApp() {
               {activeLanguage === 'hi' ? '🎙️ आवाज सहायक' : '🎙️ Advanced Voice Assistant'}
             </h1>
             <div className="flex gap-2">
-              <button
-                onClick={toggleLanguage}
-                className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
-              >
-                {activeLanguage === 'hi' ? '🇮🇳 English' : '🇮🇳 हिंदी'}
-              </button>
+            <button
+              onClick={toggleLanguage}
+              className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
+            >
+              {activeLanguage === 'hi' ? '🇮🇳 English' : '🇮🇳 हिंदी'}
+            </button>
               <button
                 onClick={() => setDarkMode(!darkMode)}
                 className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}

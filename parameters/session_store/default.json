@@ -16,41 +16,5 @@
         "text": "Hello? Hello"
       }
     ]
-  },
-  {
-    "role": "user",
-    "content": [
-      {
-        "type": "text",
-        "text": "what is a bicycle"
-      }
-    ]
-  },
-  {
-    "role": "assistant",
-    "content": [
-      {
-        "type": "text",
-        "text": "A bicycle, often called a bike, is a human-powered vehicle with two wheels attached to a frame, one behind the other. Here are some key features of a bicycle:\n\n1. It typically has a metal or carbon fiber frame.\n2. Two wheels of equal size, usually with pneumatic tires.\n3. A seat (saddle) for the rider.\n4. Handlebars for steering and balance.\n5. Pedals connected to a chain and gears, which drive the rear wheel.\n6. Brakes to slow down or stop.\n\nBicycles are used for various purposes, including:\n\n1. Transportation\n2. Recreation and exercise\n3. Sport (racing, mountain biking, BMX, etc.)\n4. Utility (delivery services, police patrols)\n\nBicycles are popular worldwide due to their efficiency, low cost, and environmentally friendly nature. They provide an excellent form of exercise and are often used as an alternative to motorized vehicles in urban areas."
-      }
-    ]
-  },
-  {
-    "role": "user",
-    "content": [
-      {
-        "type": "text",
-        "text": "what did I just ask"
-      }
-    ]
-  },
-  {
-    "role": "assistant",
-    "content": [
-      {
-        "type": "text",
-        "text": "You asked: \"what is a bicycle\"\n\nI provided a detailed explanation about bicycles in response to your question. If you have any more specific questions about bicycles or if you'd like clarification on any part of the explanation, please feel free to ask."
-      }
-    ]
   }
 ]
