@@ -9,3 +9,4 @@ numpy
 requests
 pydub
 sentence-transformers
+faiss-cpu
