@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import axios from 'axios';
 
 function VoiceApp() {
   // State management
@@ -14,7 +15,37 @@ function VoiceApp() {
   const [activeLanguage, setActiveLanguage] = useState('en');
   const [noiseLevel, setNoiseLevel] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  
+  const [waveform, setWaveform] = useState([]);
+
+  // Stock market related states
+  const [isLoadingStocks, setIsLoadingStocks] = useState(false);
+  const [marketStatus, setMarketStatus] = useState('Delayed');
+  const [stocks, setStocks] = useState([
+    { symbol: 'RELIANCE', price: 2856.15, change: 12.50 },
+    { symbol: 'TCS', price: 3845.75, change: -25.75 },
+    { symbol: 'HDFCBANK', price: 1658.20, change: 8.20 },
+    { symbol: 'INFY', price: 1520.50, change: 15.25 }
+  ]);
+
+  const [isLoadingNews, setIsLoadingNews] = useState(false);
+  const [news, setNews] = useState([
+    { 
+      title: 'Sensex crosses 75,000 for first time', 
+      source: 'ET Now', 
+      publishedAt: new Date() 
+    },
+    { 
+      title: 'RBI keeps repo rate unchanged at 6.5%', 
+      source: 'Business Standard', 
+      publishedAt: new Date(Date.now() - 5*60*60*1000) 
+    },
+    {
+      title: 'Nifty hits all-time high of 22,000',
+      source: 'Moneycontrol',
+      publishedAt: new Date(Date.now() - 2*60*60*1000)
+    }
+  ]);
+
   // Refs
   const mediaRecorderRef = useRef(null);
   const audioContextRef = useRef(null);
@@ -22,8 +53,51 @@ function VoiceApp() {
   const chunksRef = useRef([]);
   const audioRef = useRef(null);
   const chatEndRef = useRef(null);
-  const [waveform, setWaveform] = useState([]);
   const noiseLevelIntervalRef = useRef(null);
+
+  // Stock Market Widget Component
+  const StockMarketWidget = () => (
+    <div className={`p-3 rounded-lg shadow ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
+      <div className="flex justify-between items-center mb-3">
+        <h2 className="font-semibold">Indian Market</h2>
+        <span className={`text-xs px-2 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+          {marketStatus}
+        </span>
+      </div>
+      
+      <div className="space-y-3">
+        {stocks.map((stock) => (
+          <div key={stock.symbol} className="flex justify-between items-center">
+            <span className={`font-medium ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+              {stock.symbol}
+            </span>
+            <span className={`text-sm ml-4 ${
+              stock.change >= 0 ? 'text-green-500' : 'text-red-500'
+            }`}>
+              {stock.change >= 0 ? '+' : ''}{stock.change}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // News Widget Component
+  const NewsWidget = () => (
+    <div className={`p-3 rounded-lg shadow ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
+      <h2 className="font-semibold mb-3">Business Headlines</h2>
+      <div className="space-y-3">
+        {news.map((item, index) => (
+          <div key={index} className="text-sm">
+            <p className="font-medium">{item.title}</p>
+            <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              {item.source}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   // Apply dark mode to entire app
   useEffect(() => {
@@ -48,19 +122,19 @@ function VoiceApp() {
   }, [recording]);
 
   // Monitor noise levels during recording
-  useEffect(() => {
-    if (recording) {
-      noiseLevelIntervalRef.current = setInterval(() => {
-        // Simulate noise level detection (in a real app, this would come from audio analysis)
-        setNoiseLevel(Math.min(1, Math.max(0, noiseLevel + (Math.random() * 0.2 - 0.1))));
-      }, 500);
-    } else {
-      clearInterval(noiseLevelIntervalRef.current);
-      setNoiseLevel(0);
-    }
-    
-    return () => clearInterval(noiseLevelIntervalRef.current);
-  }, [recording, noiseLevel]);
+ useEffect(() => {
+  if (recording) {
+    noiseLevelIntervalRef.current = setInterval(() => {
+      // Simulate noise level detection (in a real app, this would come from audio analysis)
+      setNoiseLevel(Math.min(1, Math.max(0, noiseLevel + (Math.random() * 0.2 - 0.1))));
+    }, 500);
+  } else {
+    clearInterval(noiseLevelIntervalRef.current);
+    setNoiseLevel(0);
+  }
+
+  return () => clearInterval(noiseLevelIntervalRef.current);
+}, [recording, noiseLevel]);
 
   // Clean up audio on unmount
   useEffect(() => {
@@ -428,239 +502,274 @@ function VoiceApp() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col p-6 transition-colors duration-300 ${darkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
-      {/* Header with controls */}
-      <div className="flex justify-between items-center mb-4 max-w-3xl w-full mx-auto">
-        <h1 className="text-2xl font-bold">
-          {activeLanguage === 'hi' ? '🎙️ आवाज सहायक' : '🎙️ Advanced Voice Assistant'}
-        </h1>
-        <div className="flex gap-2">
-          <button
-            onClick={toggleLanguage}
-            className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
-          >
-            {activeLanguage === 'hi' ? '🇮🇳 English' : '🇮🇳 हिंदी'}
-          </button>
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
-          >
-            {darkMode ? '🌞 Light Mode' : '🌙 Dark Mode'}
-          </button>
-        </div>
-      </div>
-
-      {/* Noise level indicator */}
-      {recording && noiseLevel > 0.4 && (
-        <div className="max-w-3xl w-full mx-auto mb-2">
-          <div className={`text-xs ${noiseLevel > 0.7 ? 'text-red-500' : 'text-yellow-500'} flex items-center`}>
-            <span className="mr-1">
-              {noiseLevel > 0.7 ? '⚠️ High background noise' : 'Background noise detected'}
-            </span>
-            <div className="flex-1 bg-gray-200 rounded-full h-1.5">
-              <div 
-                className={`h-1.5 rounded-full ${noiseLevel > 0.7 ? 'bg-red-500' : 'bg-yellow-500'}`} 
-                style={{ width: `${noiseLevel * 100}%` }}
-              ></div>
+    <div className={`min-h-screen flex flex-col p-4 transition-colors duration-300 ${darkMode ? 'dark bg-gray-900' : 'bg-gray-100'}`}>
+      <div className="flex flex-col lg:flex-row gap-4 w-full max-w-full mx-auto h-[calc(100vh-2rem)]">
+        
+        {/* Left column - Chat interface */}
+        <div className="flex-1 flex flex-col h-full" style={{ minWidth: '65%' }}>
+          {/* Header */}
+          <div className="flex justify-between items-center mb-4">
+            <h1 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+              {activeLanguage === 'hi' ? '🎙️ आवाज सहायक' : '🎙️ Advanced Voice Assistant'}
+            </h1>
+            <div className="flex gap-2">
+              <button
+                onClick={toggleLanguage}
+                className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
+              >
+                {activeLanguage === 'hi' ? '🇮🇳 English' : '🇮🇳 हिंदी'}
+              </button>
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className={`px-3 py-1 rounded-full ${darkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}`}
+              >
+                {darkMode ? '🌞 Light Mode' : '🌙 Dark Mode'}
+              </button>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Chat history */}
-      <div className={`flex-1 w-full max-w-3xl mx-auto overflow-y-auto rounded-lg shadow p-4 mb-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
-           style={{ maxHeight: '60vh' }}>
-        {messages.length === 0 ? (
-          <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-            <p className="mb-2">
-              {activeLanguage === 'hi' 
-                ? 'माइक्रोफोन बटन दबाकर या संदेश टाइप करके शुरू करें' 
-                : 'Start by pressing the microphone button or typing a message'}
-            </p>
-            <p className="text-sm">
-              {activeLanguage === 'hi' 
-                ? 'हिंदी या अंग्रेजी में बोलने का प्रयास करें!' 
-                : 'Try speaking in English or Hindi!'}
-            </p>
-          </div>
-        ) : (
-          messages.map((msg) => (
-            <div 
-              key={msg.id} 
-              className={`flex mb-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              id={`message-${msg.audioUrl || msg.id}`}
-            >
-              <div className={`px-4 py-2 rounded-lg max-w-xs ${msg.sender === 'user'
-                ? 'bg-blue-500 text-white animate-slide-in-right'
-                : msg.sender === 'bot'
-                  ? `${darkMode ? 'bg-gray-700' : 'bg-gray-200'} ${darkMode ? 'text-white' : 'text-gray-800'} animate-slide-in-left`
-                  : msg.sender === 'system'
-                    ? `${darkMode ? 'bg-gray-600' : 'bg-gray-100'} ${darkMode ? 'text-gray-300' : 'text-gray-600'}`
-                    : 'bg-red-100 text-red-800'} ${msg.isProactive ? 'border-l-4 border-blue-400' : ''}`}>
-                <div className="text-xs opacity-80 mb-1 flex justify-between items-center">
-                  <span>
-                    {msg.sender === 'user' 
-                      ? (activeLanguage === 'hi' ? 'आप' : 'You') 
-                      : msg.sender === 'bot' 
-                        ? (activeLanguage === 'hi' ? 'सहायक' : 'Assistant')
-                        : 'System'} • {msg.timestamp}
-                  </span>
-                  {msg.language && msg.language !== activeLanguage && (
-                    <span className="text-xs opacity-60 ml-2">
-                      {msg.language === 'hi' ? '🇮🇳' : '🇬🇧'}
-                    </span>
-                  )}
+          {/* Noise level indicator */}
+          {recording && noiseLevel > 0.4 && (
+            <div className="w-full mb-2">
+              <div className={`text-xs ${noiseLevel > 0.7 ? 'text-red-500' : 'text-yellow-500'} flex items-center`}>
+                <span className="mr-1">
+                  {noiseLevel > 0.7 ? '⚠️ High background noise' : 'Background noise detected'}
+                </span>
+                <div className="flex-1 bg-gray-200 rounded-full h-1.5">
+                  <div 
+                    className={`h-1.5 rounded-full ${noiseLevel > 0.7 ? 'bg-red-500' : 'bg-yellow-500'}`} 
+                    style={{ width: `${noiseLevel * 100}%` }}
+                  ></div>
                 </div>
-                <p className={msg.isSpeaking ? 'text-blue-600 dark:text-blue-400' : ''}>
-                  {msg.text}
-                  {msg.isSpeaking && (
-                    <span className="ml-2 inline-block animate-bounce">🗣️</span>
-                  )}
+              </div>
+            </div>
+          )}
+
+          <div className={`flex-1 w-full max-w-3xl mx-auto overflow-y-auto rounded-lg shadow p-4 mb-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
+               style={{ maxHeight: '60vh' }}>
+            {messages.length === 0 ? (
+              <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                <p className="mb-2">
+                  {activeLanguage === 'hi'
+                    ? 'माइक्रोफोन बटन दबाकर या संदेश टाइप करके शुरू करें' 
+                    : 'Start by pressing the microphone button or typing a message'}
                 </p>
-                {msg.sender === 'bot' && msg.audioUrl && (
-                  <button
-                    onClick={() => toggleAudio(msg.audioUrl)}
-                    className={`mt-1 text-xs px-2 py-1 rounded-full flex items-center ${playingUrl === msg.audioUrl
-                      ? 'bg-blue-600 text-white'
-                      : darkMode
-                        ? 'bg-gray-600 text-blue-300'
-                        : 'bg-blue-100 text-blue-800'}`}
-                  >
-                    {playingUrl === msg.audioUrl ? (
-                      <>
-                        <span className="mr-1">⏸</span>
-                        {activeLanguage === 'hi' ? 'रोकें' : 'Pause'}
-                      </>
-                    ) : (
-                      <>
-                        <span className="mr-1">🔊</span>
-                        {activeLanguage === 'hi' ? 'सुनें' : 'Play'}
-                      </>
-                    )}
-                  </button>
-                )}
-                {msg.sender === 'bot' && msg.suggestions?.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {msg.suggestions.map((suggestion, i) => (
+                <p className="text-sm">
+                  {activeLanguage === 'hi' 
+                    ? 'हिंदी या अंग्रेजी में बोलने का प्रयास करें!' 
+                    : 'Try speaking in English or Hindi!'}
+                </p>
+              </div>
+            ) : (
+              messages.map((msg) => (
+                <div 
+                  key={msg.id} 
+                  className={`flex mb-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                  id={`message-${msg.audioUrl || msg.id}`}
+                >
+                  <div className={`px-4 py-2 rounded-lg max-w-xs ${msg.sender === 'user'
+                    ? 'bg-blue-500 text-white animate-slide-in-right'
+                    : msg.sender === 'bot'
+                      ? `${darkMode ? 'bg-gray-700' : 'bg-gray-200'} ${darkMode ? 'text-white' : 'text-gray-800'} animate-slide-in-left`
+                      : msg.sender === 'system'
+                        ? `${darkMode ? 'bg-gray-600' : 'bg-gray-100'} ${darkMode ? 'text-gray-300' : 'text-gray-600'}`
+                        : 'bg-red-100 text-red-800'} ${msg.isProactive ? 'border-l-4 border-blue-400' : ''}`}>
+                    <div className="text-xs opacity-80 mb-1 flex justify-between items-center">
+                      <span>
+                        {msg.sender === 'user' 
+                          ? (activeLanguage === 'hi' ? 'आप' : 'You') 
+                          : msg.sender === 'bot' 
+                            ? (activeLanguage === 'hi' ? 'सहायक' : 'Assistant')
+                            : 'System'} • {msg.timestamp}
+                      </span>
+                      {msg.language && msg.language !== activeLanguage && (
+                        <span className="text-xs opacity-60 ml-2">
+                          {msg.language === 'hi' ? '🇮🇳' : '🇬🇧'}
+                        </span>
+                      )}
+                    </div>
+                    <p className={msg.isSpeaking ? 'text-blue-600 dark:text-blue-400' : ''}>
+                      {msg.text}
+                      {msg.isSpeaking && (
+                        <span className="ml-2 inline-block animate-bounce">🗣️</span>
+                      )}
+                    </p>
+                    {msg.sender === 'bot' && msg.audioUrl && (
                       <button
-                        key={i}
-                        onClick={() => handleSuggestionClick(suggestion)}
-                        className={`text-xs px-2 py-1 rounded-full ${darkMode 
-                          ? 'bg-gray-600 text-blue-300 hover:bg-gray-500' 
-                          : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}`}
+                        onClick={() => toggleAudio(msg.audioUrl)}
+                        className={`mt-1 text-xs px-2 py-1 rounded-full flex items-center ${playingUrl === msg.audioUrl
+                          ? 'bg-blue-600 text-white'
+                          : darkMode
+                            ? 'bg-gray-600 text-blue-300'
+                            : 'bg-blue-100 text-blue-800'}`}
                       >
-                        {suggestion}
+                        {playingUrl === msg.audioUrl ? (
+                          <>
+                            <span className="mr-1">⏸</span>
+                            {activeLanguage === 'hi' ? 'रोकें' : 'Pause'}
+                          </>
+                        ) : (
+                          <>
+                            <span className="mr-1">🔊</span>
+                            {activeLanguage === 'hi' ? 'सुनें' : 'Play'}
+                          </>
+                        )}
                       </button>
-                    ))}
+                    )}
+                    {msg.sender === 'bot' && msg.suggestions?.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {msg.suggestions.map((suggestion, i) => (
+                          <button
+                            key={i}
+                            onClick={() => handleSuggestionClick(suggestion)}
+                            className={`text-xs px-2 py-1 rounded-full ${darkMode 
+                              ? 'bg-gray-600 text-blue-300 hover:bg-gray-500' 
+                              : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}`}
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+            <div ref={chatEndRef} />
+          </div>
+
+          {/* Input area */}
+          <div className="mt-auto">
+            {/* Input mode selector */}
+            <div className="flex justify-center mb-4">
+              <div className={`inline-flex rounded-md shadow-sm ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`} role="group">
+                <button
+                  onClick={() => setInputMode('voice')}
+                  className={`px-4 py-2 text-sm font-medium rounded-l-lg ${inputMode === 'voice' 
+                    ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
+                    : (darkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-100 text-gray-700')}`}
+                >
+                  {activeLanguage === 'hi' ? 'आवाज इनपुट' : 'Voice Input'}
+                </button>
+                <button
+                  onClick={() => setInputMode('text')}
+                  className={`px-4 py-2 text-sm font-medium rounded-r-lg ${inputMode === 'text' 
+                    ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
+                    : (darkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-100 text-gray-700')}`}
+                >
+                  {activeLanguage === 'hi' ? 'टेक्स्ट इनपुट' : 'Text Input'}
+                </button>
+              </div>
+            </div>
+
+            {/* Input area */}
+            {inputMode === 'text' ? (
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex w-full gap-2">
+                  <input
+                    type="text"
+                    value={textInput}
+                    onChange={(e) => setTextInput(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && sendTextToBackend()}
+                    placeholder={activeLanguage === 'hi' ? 'अपना संदेश टाइप करें...' : 'Type your message...'}
+                    className={`flex-1 px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 text-white placeholder-gray-400' : 'bg-white text-gray-800 placeholder-gray-500'} border ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}
+                  />
+                  <button
+                    onClick={sendTextToBackend}
+                    disabled={loading || !textInput.trim()}
+                    className={`px-4 py-2 rounded-lg font-medium ${loading || !textInput.trim() 
+                      ? (darkMode ? 'bg-gray-600 text-gray-400' : 'bg-gray-300 text-gray-500') 
+                      : (darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white')}`}
+                  >
+                    {activeLanguage === 'hi' ? 'भेजें' : 'Send'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2">
+                {recording && (
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-red-500">
+                      {activeLanguage === 'hi' ? 'रिकॉर्डिंग' : 'Recording'}
+                    </span>
+                    <div className="flex items-center gap-1 h-6">
+                      {waveform.map((height, i) => (
+                        <div 
+                          key={i} 
+                          className="w-1 bg-red-500 rounded-full" 
+                          style={{ height: `${height * 20}px` }}
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
+                
+                <button
+                  onClick={recording ? stopRecording : startRecording}
+                  disabled={loading}
+                  className={`px-6 py-3 rounded-full text-white font-bold shadow-lg transition-all flex items-center ${
+                    recording 
+                      ? 'bg-red-500 hover:bg-red-600' 
+                      : loading 
+                        ? 'bg-gray-500' 
+                        : 'bg-green-500 hover:bg-green-600'
+                  }`}
+                >
+                  {recording ? (
+                    <>
+                      <span className="mr-2">⏹</span>
+                      {activeLanguage === 'hi' ? 'रिकॉर्डिंग रोकें' : 'Stop Recording'}
+                    </>
+                  ) : loading ? (
+                    activeLanguage === 'hi' ? 'प्रोसेस हो रहा है...' : 'Processing...'
+                  ) : (
+                    <>
+                      <span className="mr-2">🎤</span>
+                      {activeLanguage === 'hi' ? 'रिकॉर्डिंग शुरू करें' : 'Start Recording'}
+                    </>
+                  )}
+                </button>
+                
+                {loading && (
+                  <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} animate-pulse`}>
+                    {activeLanguage === 'hi' 
+                      ? 'आपकी आवाज प्रोसेस हो रही है...' 
+                      : `Processing your ${inputMode === 'voice' ? 'voice' : 'message'}...`}
+                  </p>
+                )}
               </div>
-            </div>
-          ))
-        )}
-        <div ref={chatEndRef} />
-      </div>
-
-      {/* Input mode selector */}
-      <div className="flex justify-center mb-4">
-        <div className={`inline-flex rounded-md shadow-sm ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`} role="group">
-          <button
-            onClick={() => setInputMode('voice')}
-            className={`px-4 py-2 text-sm font-medium rounded-l-lg ${inputMode === 'voice' 
-              ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
-              : (darkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-100 text-gray-700')}`}
-          >
-            {activeLanguage === 'hi' ? 'आवाज इनपुट' : 'Voice Input'}
-          </button>
-          <button
-            onClick={() => setInputMode('text')}
-            className={`px-4 py-2 text-sm font-medium rounded-r-lg ${inputMode === 'text' 
-              ? (darkMode ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white')
-              : (darkMode ? 'bg-gray-600 text-gray-300' : 'bg-gray-100 text-gray-700')}`}
-          >
-            {activeLanguage === 'hi' ? 'टेक्स्ट इनपुट' : 'Text Input'}
-          </button>
-        </div>
-      </div>
-
-      {/* Input area */}
-      {inputMode === 'text' ? (
-        <div className="flex flex-col items-center gap-2 max-w-3xl w-full mx-auto">
-          <div className="flex w-full gap-2">
-            <input
-              type="text"
-              value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && sendTextToBackend()}
-              placeholder={activeLanguage === 'hi' ? 'अपना संदेश टाइप करें...' : 'Type your message...'}
-              className={`flex-1 px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 text-white placeholder-gray-400' : 'bg-white text-gray-800 placeholder-gray-500'} border ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}
-            />
-            <button
-              onClick={sendTextToBackend}
-              disabled={loading || !textInput.trim()}
-              className={`px-4 py-2 rounded-lg font-medium ${loading || !textInput.trim() 
-                ? (darkMode ? 'bg-gray-600 text-gray-400' : 'bg-gray-300 text-gray-500') 
-                : (darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white')}`}
-            >
-              {activeLanguage === 'hi' ? 'भेजें' : 'Send'}
-            </button>
+            )}
           </div>
         </div>
-      ) : (
-        <div className="flex flex-col items-center gap-2">
-          {recording && (
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-red-500">
-                {activeLanguage === 'hi' ? 'रिकॉर्डिंग' : 'Recording'}
-              </span>
-              <div className="flex items-center gap-1 h-6">
-                {waveform.map((height, i) => (
-                  <div 
-                    key={i} 
-                    className="w-1 bg-red-500 rounded-full" 
-                    style={{ height: `${height * 20}px` }}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-          
-          <button
-            onClick={recording ? stopRecording : startRecording}
-            disabled={loading}
-            className={`px-6 py-3 rounded-full text-white font-bold shadow-lg transition-all flex items-center ${
-              recording 
-                ? 'bg-red-500 hover:bg-red-600' 
-                : loading 
-                  ? 'bg-gray-500' 
-                  : 'bg-green-500 hover:bg-green-600'
-            }`}
-          >
-            {recording ? (
-              <>
-                <span className="mr-2">⏹</span>
-                {activeLanguage === 'hi' ? 'रिकॉर्डिंग रोकें' : 'Stop Recording'}
-              </>
-            ) : loading ? (
-              activeLanguage === 'hi' ? 'प्रोसेस हो रहा है...' : 'Processing...'
-            ) : (
-              <>
-                <span className="mr-2">🎤</span>
-                {activeLanguage === 'hi' ? 'रिकॉर्डिंग शुरू करें' : 'Start Recording'}
-              </>
-            )}
-          </button>
-          
-          {loading && (
-            <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'} animate-pulse`}>
-              {activeLanguage === 'hi' 
-                ? 'आपकी आवाज प्रोसेस हो रही है...' 
-                : `Processing your ${inputMode === 'voice' ? 'voice' : 'message'}...`}
+
+        {/* Right column - Widgets */}
+        <div className="w-full lg:w-80 flex flex-col gap-3 h-full">
+          {/* Date/time widget */}
+          <div className={`p-3 rounded-lg shadow ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
+            <h2 className="text-md font-semibold">
+              {new Date().toLocaleDateString('en-IN', { 
+                weekday: 'short', 
+                day: 'numeric', 
+                month: 'short' 
+              })}
+            </h2>
+            <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              {new Date().toLocaleTimeString('en-IN', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              })}
             </p>
-          )}
+          </div>
+
+          {/* Stocks Widget */}
+          <StockMarketWidget />
+
+          {/* News Widget */}
+          <NewsWidget />
         </div>
-      )}
+      </div>
 
       {/* Inline styles for animations */}
       <style>{`
