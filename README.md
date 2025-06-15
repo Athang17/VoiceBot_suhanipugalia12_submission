@@ -40,7 +40,7 @@
 
 ## Overview
 
-VoiceBot_suhaniyugalia12_submission is a versatile developer toolset for creating voice-enabled conversational applications. It integrates speech recognition, natural language understanding, and structured data workflows to support:
+VoiceBot_suhanipugalia12_submission is a versatile developer toolset for creating voice-enabled conversational applications. It integrates speech recognition, natural language understanding, and structured data workflows to support:
 - Real-time audio processing
 - Customer interaction summarization
 - Sentiment analysis
@@ -62,15 +62,66 @@ This project simplifies building intelligent voice assistants and chatbots with:
 ## Getting Started
 
 ### Prerequisites
-- **Programming Language**: Python 3.7+
-- **Package Managers**:
-  - `npm` (v7+)
-  - `pip` (v21+)
+This project requires the following dependencies:
+- **Programming Language**: Python
+- **Package Manager**: npm, pip
 
 ### Installation
+
+Build `VoiceBot_suhanipugalia12_submission` from the source and install dependencies:
+
 1. Clone the repository:
 ```bash
-git clone https://github.com/Athang17/VoiceBot_subanipugalia12_submission
+git clone https://github.com/Athang17/VoiceBot_suhanipugalia12_submission
+```
 
+2. Navigate to the project directory:
+```bash
+cd VoiceBot_suhanipugalia12_submission
+```
 
+3. Install the dependencies:
 
+**Using `npm`:**
+```bash
+npm install
+```
+
+**Using `pip`:**
+```bash
+pip install -r requirements.txt -q --progress-bar off && pip install flask flask_cors pydub vosk openai tiktoken
+```
+
+---
+
+### Usage
+
+Run the project with:
+
+**Using `npm`:**
+```bash
+npm start
+```
+
+**Using `pip`:**
+```bash
+python [entrypoint].py
+```
+
+---
+
+## Testing
+
+`VoiceBot_suhanipugalia12_submission` uses the `test_framework` test framework. Run the test suite with:
+
+**Using `npm`:**
+```bash
+npm test
+```
+
+**Using `pip`:**
+```bash
+pytest
+```
+
+---
