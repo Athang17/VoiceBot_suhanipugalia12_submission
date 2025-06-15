@@ -115,6 +115,28 @@ function VoiceApp() {
     document.documentElement.classList.toggle('dark', darkMode);
   }, [darkMode]);
 
+  // Add this useEffect hook to your existing hooks section
+  useEffect(() => {
+  const handleKeyDown = (e) => {
+    // Only trigger if we're in voice input mode and not currently loading
+    if (inputMode === 'voice' && !loading && e.code === 'Space') {
+      e.preventDefault(); // Prevent spacebar from scrolling the page
+      
+      if (recording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+  };
+
+  window.addEventListener('keydown', handleKeyDown);
+  
+  return () => {
+    window.removeEventListener('keydown', handleKeyDown);
+  };
+  }, [inputMode, loading, recording]); // Dependencies ensure we always have fresh values
+
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
