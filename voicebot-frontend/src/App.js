@@ -904,32 +904,40 @@ function VoiceApp() {
           </div>
         </div>
 
-        {/* Right column - Widgets */}
-        <div className="w-full lg:w-80 flex flex-col gap-3 h-full">
-          {/* Date/time widget */}
-          <div className={`p-3 rounded-lg shadow ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
-            <h2 className="text-md font-semibold">
-              {new Date().toLocaleDateString('en-IN', { 
-                weekday: 'short', 
-                day: 'numeric', 
-                month: 'short' 
-              })}
-            </h2>
-            <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              {new Date().toLocaleTimeString('en-IN', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: true
-              })}
-            </p>
-          </div>
+{/* Right column - Widgets */}
+<div className="w-full lg:w-80 flex flex-col gap-3 h-full">
+  {/* Date/time widget */}
+  <div className={`p-3 rounded-lg shadow ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'}`}>
+    <h2 className="text-md font-semibold">
+      {new Date().toLocaleDateString('en-IN', { 
+        weekday: 'short', 
+        day: 'numeric', 
+        month: 'short' 
+      })}
+    </h2>
+    <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+      {new Date().toLocaleTimeString('en-IN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      })}
+    </p>
+  </div>
 
-          {/* Stocks Widget */}
-          <StockMarketWidget darkMode={darkMode} />
+  {/* Stocks Widget */}
+  <StockMarketWidget darkMode={darkMode} />
 
-          {/* News Widget */}
-          <NewsWidget darkMode={darkMode} />
-        </div>
+  {/* News Widget */}
+  <NewsWidget darkMode={darkMode} />
+
+  {/* Only keep this one ConversationSummary component */}
+  <ConversationSummary 
+    messages={messages}
+    darkMode={darkMode}
+    activeLanguage={activeLanguage}
+  />
+</div>
+
       </div>
 
       {/* Inline styles for animations */}
