@@ -46,6 +46,7 @@ VoiceBot_suhanipugalia12_submission is a versatile developer toolset for creatin
 - Sentiment analysis
 - User engagement enhancement
 - Support automation
+- Pdf summary of the conversation
 
 ## Why VoiceBot?
 
