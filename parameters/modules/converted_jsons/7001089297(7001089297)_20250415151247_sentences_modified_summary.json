@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer named <PII_NAME> and a relationship manager named <PII_NAME> from the Lendhen Club, a P2P lending platform. The customer has recently created an account with the platform and invested, and the conversation is about any queries or questions the customer might have related to the investment.",
+    "customer_concerns": "- The customer does not have any specific queries or concerns at the moment.",
+    "questions_asked": "- None. The customer mentions that if any queries come up, they will let the relationship manager know.",
+    "overall_sentiment": "Neutral. The conversation is polite and straightforward, with the customer expressing no immediate concerns or questions."
+}

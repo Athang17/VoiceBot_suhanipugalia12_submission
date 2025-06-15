@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_2) and a customer service representative (speaker_1) from a financial/banking product or service. The customer is inquiring about the details of their loan accounts, including the principal amount, interest, and repayment status.",
+    "customer_concerns": "- The customer wants to understand the details of their loan accounts, including the principal amount, interest, and repayment status.",
+    "questions_asked": "- What was the total loan amount as of a specific date?\n- Can the customer receive a statement for the previous financial year to understand the breakdown of principal and interest amounts?",
+    "overall_sentiment": "Neutral. The conversation is focused on the customer seeking information and clarification about their loan details, and the customer service representative is providing the requested information in a helpful manner."
+}

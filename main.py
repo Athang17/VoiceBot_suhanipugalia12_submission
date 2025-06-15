@@ -6,6 +6,9 @@ from dotenv import load_dotenv
 import sys
 sys.path.append("voicebot-backend")
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # from modules.transcribe_aws import transcribe_audio
 from parameters.modules.asr_module import transcribe_audio
 # from modules.bedrock_model import generate_response_bedrock

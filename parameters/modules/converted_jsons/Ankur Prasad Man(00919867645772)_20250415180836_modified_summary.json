@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_1) and a customer service representative (speaker_0) from a financial/lending platform. The customer is inquiring about the status of their loan application and other details related to the lending process.",
+    "customer_concerns": "- None explicitly mentioned.",
+    "questions_asked": "- The customer asks about the timeline for the CA (Chartered Accountant) follow-up.\n- The customer inquires about the update timeline for loan payments being processed.\n- The customer asks about the platform's MPIs (Monthly Periodic Installments) for long-term and short-term loans, and which ones they are seeing more of.\n- The customer asks about the individual loan limit on the platform.",
+    "overall_sentiment": "Neutral. The conversation is focused on information-seeking and clarifying details about the lending process, without any strong emotional expression."
+}

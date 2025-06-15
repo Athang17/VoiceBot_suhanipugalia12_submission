@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
@@ -23,3 +24,57 @@ yarn-debug.log*
 yarn-error.log*
 ./instructions/env
 **/site-packages/
+=======
+# Node.js
+node_modules/
+.pnp/
+.pnp.js
+
+# Build
+build/
+coverage/
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+*.pyd
+.Python
+
+# Virtualenv
+venv/
+.venv/
+ENV/
+env/
+env.bak/
+
+# Site-packages (just in case, but venv/ already covers it)
+**/site-packages/
+
+# Local data
+parameters/modules/local_jsons/
+parameters/modules/auto_cached_jsons/
+uploads/
+tts_outputs/
+
+# Environment and secrets
+.env
+.env.*
+instructions/.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE/editor
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+>>>>>>> 722eea07fb020b3a6ab6b0783b1676745b14b7b5

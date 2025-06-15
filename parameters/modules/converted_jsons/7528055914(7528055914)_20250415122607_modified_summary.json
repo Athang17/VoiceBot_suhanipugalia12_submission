@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_0) and a relationship manager (speaker_1) from Lending Club, a peer-to-peer lending platform. The customer had invested in the platform and the relationship manager is calling to address any doubts or concerns the customer might have.",
+    "customer_concerns": "- The customer wanted to understand the nature of the peer-to-peer lending platform, as it is \"person to person\" lending.\n- The customer was concerned about the consequences if a borrower defaults on their repayment.\n- The customer inquired if Lending Club provides any insurance coverage for such defaults.",
+    "questions_asked": "- What happens if a borrower defaults on their repayment?\n- Does Lending Club provide any insurance coverage for defaults?",
+    "overall_sentiment": "Neutral. The customer was seeking clarification on the platform's features and risk management, but the conversation remained professional and informative."
+}

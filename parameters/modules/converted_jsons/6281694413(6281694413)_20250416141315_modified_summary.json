@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_1) and a customer service representative (speaker_0) from a lending platform (PV). The customer is inquiring about the safety and returns of the platform's investment options, particularly the lumpsum and manual lending options.",
+    "customer_concerns": "- The customer is concerned about the risks involved in the investment options, especially the manual lending.\n- The customer wants to understand which investment option would be the safest with good returns.",
+    "questions_asked": "- Is the manual lending safe, or does it have some risks?\n- Which investment option would the representative suggest - lumpsum or manual lending?\n- Are there daily returns available in the lumpsum investment option?",
+    "overall_sentiment": "Neutral.\nThe customer is seeking information and clarification about the investment options, and the representative is providing explanations and suggestions. The conversation does not indicate any particularly positive or negative sentiment."
+}

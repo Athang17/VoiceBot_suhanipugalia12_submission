@@ -1,0 +1,6 @@
+{
+    "summary": "This is a customer service conversation between a customer (speaker_0) and a relationship manager (speaker_1) from a lending club platform. The customer had invested in a peer-to-peer lending platform and is seeking clarity on various aspects of the investment, including the agreement, interest rates, fees, and withdrawal of funds.",
+    "customer_concerns": "- The customer did not receive the investment certificate/agreement from the lending platform.\n- The customer is unable to reach the customer care number provided for the interest rates and other details.",
+    "questions_asked": "- What is the agreement between the customer and the lending platform?\n- What are the details of the investment, such as the interest rate, return, and fees?\n- How can the customer withdraw the invested funds, and how will the payments be made to the customer's bank account?\n- Can the customer open a new bank account to receive the payments?",
+    "overall_sentiment": "Neutral. The customer is seeking information and clarification on various aspects of the investment, and the relationship manager is trying to address the customer's concerns."
+}

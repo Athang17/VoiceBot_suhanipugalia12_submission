@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer (speaker_1) and a customer service representative (speaker_2) from a financial institution or loan provider. They are discussing the customer's loan account details and discrepancies in the loan repayment amounts.",
+    "customer_concerns": "- The customer is concerned about the discrepancy in the repayment amounts and where the remaining amount has gone.\n- The customer is also concerned about the bank holidays and how they might have affected the loan repayment schedule.",
+    "questions_asked": "- Where did the remaining amount of \u20b9747 go after the customer received \u20b9818 from the Loan Club?\n- The customer also asks about the loan repayment schedule during the bank holidays (Friday, Saturday, Sunday or Saturday, Sunday, Monday).",
+    "overall_sentiment": "Neutral. The customer is trying to understand the discrepancies in the loan repayment amounts, and the customer service representative is providing explanations and information to resolve the issue."
+}

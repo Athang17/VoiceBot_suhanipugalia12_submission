@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a Lending Club customer service representative (speaker_0) and two customers (speaker_1 and speaker_2). The representative is trying to assist the customers with their investment accounts and queries related to Lending Club, a peer-to-peer lending platform.",
+    "customer_concerns": "- None explicitly expressed.",
+    "questions_asked": "- Does the customer (speaker_1) have a Lending Club account under her name?\n- Who is handling the customer's (speaker_1) Lending Club account?\n- Can the customer (speaker_1) provide the mobile number of the person handling their account?\n- Does the customer (speaker_2) have a relationship manager assigned to their Lending Club account?\n- What is the customer's (speaker_2) registered mobile number?\n- Does Lending Club have any branches in the customer's (speaker_2) city?",
+    "overall_sentiment": "Neutral. The conversation appears to be a routine customer service interaction where the representative is trying to gather information and assist the customers with their Lending Club accounts."
+}

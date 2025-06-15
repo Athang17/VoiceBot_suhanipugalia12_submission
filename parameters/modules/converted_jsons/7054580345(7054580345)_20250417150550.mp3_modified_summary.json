@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer service representative (speaker_0) from Lenden Club, a financial platform, and a customer (speaker_1). The customer service representative is conducting a welcome call to address the customer's concerns and queries regarding the Lenden Club platform and the investment options.",
+    "customer_concerns": "- The customer is facing issues with the platform, such as slow loading and buffering when opening tabs.\n- The customer had added funds twice, and the transaction process kept going on even after the funds were deducted.",
+    "questions_asked": "- What is the maximum interest rate the customer can earn through manual lending?\n- What do the 46% and 47% interest rates mentioned for the borrowers mean?\n- What is the plan for the 24% lump sum investment of <PII_AMOUNT>?\n- How much fixed amount will the customer get?\n- What about the daily repayment system that used to be available?",
+    "overall_sentiment": "Neutral. The customer expresses some concerns about the platform's performance, but the conversation is focused on resolving the issues and providing information about the investment options."
+}

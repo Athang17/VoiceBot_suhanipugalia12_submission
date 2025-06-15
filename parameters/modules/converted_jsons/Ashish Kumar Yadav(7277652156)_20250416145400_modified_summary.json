@@ -1,0 +1,6 @@
+{
+    "summary": "The conversation is between a customer, <PII_NAME>, and a relationship manager from LinkedIn. The customer is inquiring about a referral offer that they had previously received and whether they are eligible for any benefits.",
+    "customer_concerns": "- The customer is concerned that they did not receive any benefits from the referral they made.\n- The customer wants to know if there are any current referral offers or benefits available.",
+    "questions_asked": "- What benefits are available for the referral the customer made?\n- Is there currently any referral offer or benefit available?",
+    "overall_sentiment": "Neutral. The customer is seeking information and clarification, but does not express strong positive or negative sentiment."
+}
