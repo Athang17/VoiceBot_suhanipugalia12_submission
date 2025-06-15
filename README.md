@@ -123,31 +123,22 @@ cd voicebot-frontend
 npm start
 ```
 
-3. Navigate to the demo directory:
-```bash
-cd demo
-```
 
-4. Run the Backend
-**Using `pip`:**
-```bash
-python run_inference.py 
-```
 
 ---
 
 ## Testing
 
-`VoiceBot_suhanipugalia12_submission` uses the `test_framework` test framework. Run the test suite with:
 
-**Using `npm`:**
+1. Navigate to the demo directory:
 ```bash
-npm test
+cd demo
 ```
 
+2. Run the Backend
 **Using `pip`:**
 ```bash
-pytest
+python run_inference.py 
 ```
 
 ---
