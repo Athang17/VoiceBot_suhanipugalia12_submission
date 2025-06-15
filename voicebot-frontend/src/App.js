@@ -37,12 +37,12 @@ function VoiceApp() {
     { 
       title: 'RBI keeps repo rate unchanged at 6.5%', 
       source: 'Business Standard', 
-      publishedAt: new Date(Date.now() - 5*60*60*1000) 
-    },
-    {
+      publishedAt: new Date(Date.now() - 5*60*60*1000),
+    },{
       title: 'Nifty hits all-time high of 22,000',
       source: 'Moneycontrol',
       publishedAt: new Date(Date.now() - 2*60*60*1000)
+    
     }
   ]);
 
@@ -122,19 +122,18 @@ function VoiceApp() {
   }, [recording]);
 
   // Monitor noise levels during recording
- useEffect(() => {
-  if (recording) {
-    noiseLevelIntervalRef.current = setInterval(() => {
-      // Simulate noise level detection (in a real app, this would come from audio analysis)
-      setNoiseLevel(Math.min(1, Math.max(0, noiseLevel + (Math.random() * 0.2 - 0.1))));
-    }, 500);
-  } else {
-    clearInterval(noiseLevelIntervalRef.current);
-    setNoiseLevel(0);
-  }
-
-  return () => clearInterval(noiseLevelIntervalRef.current);
-}, [recording, noiseLevel]);
+  useEffect(() => {
+    if (recording) {
+      noiseLevelIntervalRef.current = setInterval(() => {
+        setNoiseLevel(Math.min(1, Math.max(0, noiseLevel + (Math.random() * 0.2 - 0.1)));
+      }, 500);
+    } else {
+      clearInterval(noiseLevelIntervalRef.current);
+      setNoiseLevel(0);
+    }
+    
+    return () => clearInterval(noiseLevelIntervalRef.current);
+  }, [recording, noiseLevel]);
 
   // Clean up audio on unmount
   useEffect(() => {
@@ -177,7 +176,6 @@ function VoiceApp() {
       const source = audioContextRef.current.createMediaStreamSource(stream);
       source.connect(analyserRef.current);
       
-      // Simulate noise cancellation effect
       if (noiseLevel > 0.7) {
         addSystemMessage("Background noise detected. Activating noise cancellation...");
       }
@@ -210,10 +208,9 @@ function VoiceApp() {
         await sendAudioToBackend(blob);
       };
 
-      mediaRecorderRef.current.start(100); // Collect data every 100ms for near-real-time
+      mediaRecorderRef.current.start(100);
       setRecording(true);
       
-      // Add system message about recording quality
       if (noiseLevel > 0.5) {
         addSystemMessage("Noisy environment detected. Speak clearly for best results.");
       }
@@ -252,13 +249,25 @@ function VoiceApp() {
 
   // Enhanced response handling with language detection
   const handleBotResponse = (data) => {
-    // Detect language change
     if (data.language && data.language !== activeLanguage) {
       setActiveLanguage(data.language);
       addSystemMessage(`Switched to ${data.language === 'hi' ? 'Hindi' : 'English'} mode`);
     }
 
-    // Add bot response with emotional markers
+    const fallbackPhrases = [
+      "i didn't understand",
+      "could you repeat",
+      "can you rephrase",
+      "please clarify",
+      "not sure what you mean",
+      "could you say that again"
+    ];
+
+    const responseText = (data.response || "").toLowerCase();
+    const isFallback = fallbackPhrases.some(phrase =>
+      responseText.includes(phrase)
+    );
+
     const botMessage = {
       sender: 'bot',
       text: data.response,
@@ -269,16 +278,18 @@ function VoiceApp() {
       language: data.language || activeLanguage,
       isProactive: data.isProactive || false
     };
-    
+
     setMessages(prev => [...prev, botMessage]);
 
-    // Update conversation context with more history
+    if (isFallback) {
+      addSystemMessage("Sorry, I couldn't catch that. Could you please repeat or rephrase?");
+    }
+    
     setConversationContext(prev => [...prev, {
       user: data.transcript || textInput,
       bot: data.response
     }]);
-
-    // Update full conversation history for deep memory
+    
     setConversationHistory(prev => [...prev, {
       user: data.transcript || textInput,
       bot: data.response,
@@ -312,7 +323,7 @@ function VoiceApp() {
         body: JSON.stringify({
           text: textInput,
           context: conversationContext.slice(-3),
-          full_history: conversationHistory.slice(-10), // Send last 10 exchanges for deep memory
+          full_history: conversationHistory.slice(-10),
           current_language: activeLanguage
         })
       });
@@ -320,13 +331,11 @@ function VoiceApp() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
 
-      // Remove thinking message
       setMessages(prev => prev.filter(msg => !msg.isThinking));
       handleBotResponse(data);
     } catch (err) {
       setMessages(prev => prev.filter(msg => !msg.isThinking));
       
-      // Enhanced error handling
       if (err.message.includes("ambiguous") || err.message.includes("not understood")) {
         addSystemMessage("I'm not sure I understand. Could you rephrase or provide more details?");
       } else {
@@ -344,8 +353,6 @@ function VoiceApp() {
     try {
       const formData = new FormData();
       formData.append("audio", audioBlob, "recording.mp3");
-      
-      // Add conversation context and history
       formData.append("context", JSON.stringify(conversationContext.slice(-3)));
       formData.append("full_history", JSON.stringify(conversationHistory.slice(-10)));
       formData.append("current_language", activeLanguage);
@@ -359,10 +366,8 @@ function VoiceApp() {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
 
-      // Remove thinking message
       setMessages(prev => prev.filter(msg => !msg.isThinking));
 
-      // Add user message
       const userMessage = {
         sender: 'user',
         text: data.transcript,
@@ -376,7 +381,6 @@ function VoiceApp() {
     } catch (err) {
       setMessages(prev => prev.filter(msg => !msg.isThinking));
       
-      // Enhanced error handling with suggestions
       if (err.message.includes("audio quality")) {
         addSystemMessage("I couldn't hear you clearly. Try speaking louder or in a quieter environment.");
       } else {
@@ -387,7 +391,6 @@ function VoiceApp() {
     }
   };
 
-  // Hyper-realistic audio playback with emotion detection
   const toggleAudio = (url) => {
     if (playingUrl === url) {
       audioRef.current.pause();
@@ -401,14 +404,12 @@ function VoiceApp() {
       setPlayingUrl(url);
       setIsSpeaking(true);
       
-      // Add visual speaking indicator
       setMessages(prev => prev.map(msg => 
         msg.audioUrl === url ? {...msg, isSpeaking: true} : msg
       ));
       
       audioRef.current.play()
         .then(() => {
-          // Success - add subtle animation
           const messageElement = document.getElementById(`message-${url}`);
           if (messageElement) {
             messageElement.classList.add('animate-pulse-slow');
@@ -446,7 +447,6 @@ function VoiceApp() {
       language: activeLanguage
     }]);
     
-    // Simulate sending this as a query with quick response
     setTimeout(() => {
       fetch("http://localhost:5000/query", {
         method: "POST",
@@ -458,7 +458,7 @@ function VoiceApp() {
           context: conversationContext.slice(-3),
           full_history: conversationHistory.slice(-10),
           current_language: activeLanguage,
-          is_followup: true // Flag for quick response
+          is_followup: true
         })
       })
       .then(res => res.json())
@@ -471,7 +471,6 @@ function VoiceApp() {
     }, 300);
   };
 
-  // Proactive suggestion based on conversation
   const showProactiveSuggestion = () => {
     if (conversationHistory.length > 2) {
       const lastTopic = conversationHistory[conversationHistory.length - 1].bot;
@@ -494,7 +493,6 @@ function VoiceApp() {
     }
   };
 
-  // Language toggle function
   const toggleLanguage = () => {
     const newLanguage = activeLanguage === 'en' ? 'hi' : 'en';
     setActiveLanguage(newLanguage);
@@ -545,8 +543,9 @@ function VoiceApp() {
             </div>
           )}
 
+          {/* Increased chat area height */}
           <div className={`flex-1 w-full max-w-3xl mx-auto overflow-y-auto rounded-lg shadow p-4 mb-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
-               style={{ maxHeight: '60vh' }}>
+               style={{ height: '70vh' }}>
             {messages.length === 0 ? (
               <div className={`text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                 <p className="mb-2">
