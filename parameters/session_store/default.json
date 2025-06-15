@@ -4,7 +4,7 @@
     "content": [
       {
         "type": "text",
-        "text": "hello"
+        "text": "Hello"
       }
     ]
   },
@@ -22,7 +22,7 @@
     "content": [
       {
         "type": "text",
-        "text": "hello"
+        "text": "what does protocol mean"
       }
     ]
   },
@@ -31,7 +31,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Hello? Hello"
+        "text": "The term \"protocol\" can have different meanings depending on the context. Here are some common definitions:\n\n1. In general usage:\n   - A set of rules or procedures to be followed in formal situations.\n   - The official system of rules and behavior for important occasions.\n\n2. In diplomacy:\n   - The accepted code of behavior and courtesy in official dealings between governments or dignitaries.\n\n3. In computing and networking:\n   - A set of rules and standards that define how data is transmitted between devices or systems.\n   - Examples include HTTP (Hypertext Transfer Protocol) for web browsing, or TCP/IP (Transmission Control Protocol/Internet Protocol) for internet communications.\n\n4. In science and medicine:\n   - A detailed plan or set of steps to be followed in a scientific experiment or medical treatment.\n\n5. In business:\n   - A system of rules or procedures for handling specific situations in a professional setting.\n\nThe core idea across these definitions is that a protocol is a standardized set of rules or procedures designed to ensure consistency, efficiency, and proper conduct in various fields and situations."
       }
     ]
   },
@@ -40,7 +40,7 @@
     "content": [
       {
         "type": "text",
-        "text": "hello"
+        "text": "what did I just say"
       }
     ]
   },
@@ -49,7 +49,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Hello? Hello"
+        "text": "You said \"Hello\" at the beginning of our conversation."
       }
     ]
   },
@@ -58,7 +58,7 @@
     "content": [
       {
         "type": "text",
-        "text": "hello"
+        "text": "can you repeat exact last message"
       }
     ]
   },
@@ -67,7 +67,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Hello? Hello"
+        "text": "Certainly. The exact last message you sent was:\n\n\"what did I just say\""
       }
     ]
   },
@@ -76,7 +76,7 @@
     "content": [
       {
         "type": "text",
-        "text": "hello"
+        "text": "hi"
       }
     ]
   },
@@ -85,25 +85,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Hello? Hello"
-      }
-    ]
-  },
-  {
-    "role": "user",
-    "content": [
-      {
-        "type": "text",
-        "text": "hello"
-      }
-    ]
-  },
-  {
-    "role": "assistant",
-    "content": [
-      {
-        "type": "text",
-        "text": "Hello? Hello"
+        "text": "Hi! How can I help you today?"
       }
     ]
   }

@@ -49,14 +49,14 @@ const NewsWidget = ({ darkMode, messages, activeLanguage }) => {
           ))
         )}
       </div>
-
+{/* 
       <div className="w-65 lg:w-80 flex flex-col gap-3 h-full">
         <ConversationSummary 
           messages={messages} 
           darkMode={darkMode} 
           activeLanguage={activeLanguage} 
         />
-      </div>
+      </div> */}
     </div>
   );
 };

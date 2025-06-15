@@ -1,0 +1,20 @@
+[
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "Hello Who are you? What is your name?"
+      }
+    ]
+  },
+  {
+    "role": "assistant",
+    "content": [
+      {
+        "type": "text",
+        "text": "Hello! I'm an AI assistant created by Anthropic. I don't have a personal name - I'm just called Claude. It's nice to meet you! How can I help you today?"
+      }
+    ]
+  }
+]
