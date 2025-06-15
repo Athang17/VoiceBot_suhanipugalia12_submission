@@ -22,7 +22,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Okay."
+        "text": "Hello, how are you?"
       }
     ]
   },
@@ -31,61 +31,7 @@
     "content": [
       {
         "type": "text",
-        "text": "Hello! Is there anything in particular you'd like to chat about or any questions you have? I'm here to help with a wide range of topics, so feel free to ask about anything you're curious about or need assistance with."
-      }
-    ]
-  },
-  {
-    "role": "user",
-    "content": [
-      {
-        "type": "text",
-        "text": "Hello, how's it going man?"
-      }
-    ]
-  },
-  {
-    "role": "assistant",
-    "content": [
-      {
-        "type": "text",
-        "text": "Hello! I'm doing well, thanks for asking. However, I'm an AI assistant, not a person, so I don't have personal experiences or feelings in the same way humans do. But I'm here and ready to help you with any questions or tasks you might have. How can I assist you today?"
-      }
-    ]
-  },
-  {
-    "role": "user",
-    "content": [
-      {
-        "type": "text",
-        "text": "You Claude"
-      }
-    ]
-  },
-  {
-    "role": "assistant",
-    "content": [
-      {
-        "type": "text",
-        "text": "I appreciate you addressing me directly. As an AI, I don't have feelings or experiences like humans do, but I'm always glad to engage in conversation and help out where I can. Is there anything specific you'd like to chat about or any way I can assist you today?"
-      }
-    ]
-  },
-  {
-    "role": "user",
-    "content": [
-      {
-        "type": "text",
-        "text": "Hello, what is a mobile phone?"
-      }
-    ]
-  },
-  {
-    "role": "assistant",
-    "content": [
-      {
-        "type": "text",
-        "text": "A mobile phone, also known as a cell phone or smartphone, is a portable electronic device used for communication and various other functions. Here are the key points about mobile phones:\n\n1. Primary function: Making voice calls and sending text messages.\n\n2. Wireless communication: Uses cellular networks to connect to other phones and the internet.\n\n3. Portability: Small, lightweight, and designed to be carried around easily.\n\n4. Smart capabilities: Modern smartphones can:\n   - Access the internet\n   - Run applications (apps)\n   - Take photos and videos\n   - Play music and videos\n   - Use GPS for navigation\n   - Send emails\n   - Access social media\n\n5. Operating systems: Common mobile operating systems include iOS (for Apple devices) and Android (for various manufacturers).\n\n6. Touch screen: Most modern mobile phones have touch-sensitive screens for user interaction.\n\n7. Battery-powered: Rechargeable batteries allow for use without being plugged in.\n\n8. Additional features: May include Bluetooth connectivity, Wi-Fi, mobile payment capabilities, and various sensors.\n\nMobile phones have become an integral part of modern life, serving as multifunctional devices for communication, entertainment, and productivity."
+        "text": "Hello! I'm doing well, thank you for asking. How are you doing today? Is there anything I can help you with?"
       }
     ]
   }
