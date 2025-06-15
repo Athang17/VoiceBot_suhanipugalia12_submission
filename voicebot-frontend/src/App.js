@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
+// import axios from 'axios';
+import ConversationSummary from './components/ConversationSummary';
 
 function VoiceApp() {
   // State management
@@ -79,6 +80,7 @@ function VoiceApp() {
           </div>
         ))}
       </div>
+      
     </div>
   );
 
@@ -96,7 +98,16 @@ function VoiceApp() {
           </div>
         ))}
       </div>
+      <div className="w-65 lg:w-80 flex flex-col gap-3 h-full">
+        {/* Existing widgets... */}
+        <ConversationSummary 
+          messages={messages} 
+          darkMode={darkMode} 
+          activeLanguage={activeLanguage} 
+        />
+      </div>
     </div>
+    
   );
 
   // Apply dark mode to entire app
@@ -125,7 +136,7 @@ function VoiceApp() {
   useEffect(() => {
     if (recording) {
       noiseLevelIntervalRef.current = setInterval(() => {
-        setNoiseLevel(Math.min(1, Math.max(0, noiseLevel + (Math.random() * 0.2 - 0.1)));
+        setNoiseLevel(Math.min(1, Math.max(0, noiseLevel + (Math.random() * 0.2 - 0.1))));
       }, 500);
     } else {
       clearInterval(noiseLevelIntervalRef.current);
